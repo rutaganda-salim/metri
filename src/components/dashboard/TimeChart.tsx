@@ -12,22 +12,71 @@ import {
   Legend,
 } from "recharts";
 import { DateRange } from "react-day-picker";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format, eachDayOfInterval, isSameDay } from "date-fns";
 
 interface TimeChartProps {
+  trackingId?: string;
   dateRange?: DateRange;
 }
 
-export function TimeChart({ dateRange }: TimeChartProps) {
-  // This would typically fetch from an API based on dateRange
-  const data = [
-    { date: "Jan 1", visitors: 4000, pageviews: 5400 },
-    { date: "Jan 2", visitors: 3000, pageviews: 4200 },
-    { date: "Jan 3", visitors: 2000, pageviews: 3800 },
-    { date: "Jan 4", visitors: 2780, pageviews: 5200 },
-    { date: "Jan 5", visitors: 1890, pageviews: 4800 },
-    { date: "Jan 6", visitors: 2390, pageviews: 5100 },
-    { date: "Jan 7", visitors: 3490, pageviews: 6300 },
-  ];
+export function TimeChart({ trackingId, dateRange }: TimeChartProps) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['time-chart', trackingId, dateRange],
+    queryFn: async () => {
+      if (!trackingId) return [];
+      
+      const from = dateRange?.from ? new Date(dateRange.from) : new Date(new Date().setDate(new Date().getDate() - 7));
+      const to = dateRange?.to ? new Date(dateRange.to) : new Date();
+      
+      // Set the time to cover the full day
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      
+      const { data, error } = await supabase
+        .from("page_views")
+        .select("*")
+        .eq("tracking_id", trackingId)
+        .gte("created_at", from.toISOString())
+        .lte("created_at", to.toISOString());
+      
+      if (error) throw error;
+      
+      // Generate all days in the date range
+      const days = eachDayOfInterval({ start: from, end: to });
+      
+      // Create an object to hold data for each day
+      const chartData = days.map(day => {
+        const dayFormatted = format(day, "MMM d");
+        
+        // Count page views for this day
+        const pageViews = data.filter(item => {
+          const itemDate = new Date(item.created_at);
+          return isSameDay(itemDate, day);
+        }).length;
+        
+        // Count unique visitors for this day
+        const visitors = new Set(
+          data.filter(item => {
+            const itemDate = new Date(item.created_at);
+            return isSameDay(itemDate, day);
+          }).map(item => item.visitor_id)
+        ).size;
+        
+        return {
+          date: dayFormatted,
+          visitors,
+          pageviews: pageViews
+        };
+      });
+      
+      return chartData;
+    },
+    enabled: !!trackingId,
+  });
+  
+  const chartData = data || [];
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -57,43 +106,53 @@ export function TimeChart({ dateRange }: TimeChartProps) {
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={data}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#888"
-                fontSize={12}
-              />
-              <YAxis 
-                stroke="#888"
-                fontSize={12}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="visitors"
-                stroke="#1d4ed8"
-                activeDot={{ r: 8 }}
-                strokeWidth={2}
-              />
-              <Line
-                type="monotone"
-                dataKey="pageviews"
-                stroke="#10b981"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : chartData.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              No data available for the selected period
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={chartData}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: 20,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="#888"
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke="#888"
+                  fontSize={12}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="visitors"
+                  stroke="#1d4ed8"
+                  activeDot={{ r: 8 }}
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="pageviews"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

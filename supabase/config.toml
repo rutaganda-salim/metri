@@ -1,1 +1,8 @@
+
 project_id = "mgsubqvamygnunlzttsr"
+
+[functions.generate-tracking-script]
+verify_jwt = false
+
+[functions.track-pageview]
+verify_jwt = false

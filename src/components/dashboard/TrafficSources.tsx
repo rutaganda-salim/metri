@@ -1,27 +1,109 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { DateRange } from "react-day-picker";
 
-export function TrafficSources() {
-  // This would typically fetch from an API
-  const data = [
-    { name: "Direct", value: 35, color: "#1d4ed8" },
-    { name: "Search", value: 30, color: "#10b981" },
-    { name: "Social", value: 20, color: "#f59e0b" },
-    { name: "Referral", value: 10, color: "#7c3aed" },
-    { name: "Other", value: 5, color: "#f43f5e" },
-  ];
+interface TrafficSourcesProps {
+  trackingId?: string;
+  dateRange?: DateRange;
+}
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="glass-morphism p-2 rounded-md">
-          <p className="text-sm font-medium">{`${payload[0].name}: ${payload[0].value}%`}</p>
-        </div>
-      );
-    }
-    return null;
+export function TrafficSources({ trackingId, dateRange }: TrafficSourcesProps) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['traffic-sources', trackingId, dateRange],
+    queryFn: async () => {
+      if (!trackingId) return [];
+      
+      const from = dateRange?.from ? new Date(dateRange.from) : new Date(new Date().setDate(new Date().getDate() - 7));
+      const to = dateRange?.to ? new Date(dateRange.to) : new Date();
+      
+      // Set the time to cover the full day
+      from.setHours(0, 0, 0, 0);
+      to.setHours(23, 59, 59, 999);
+      
+      const { data, error } = await supabase
+        .from("page_views")
+        .select("referrer")
+        .eq("tracking_id", trackingId)
+        .gte("created_at", from.toISOString())
+        .lte("created_at", to.toISOString());
+      
+      if (error) throw error;
+      
+      // Process referrer data
+      const referrers = {};
+      let total = 0;
+      
+      data.forEach(item => {
+        const referrer = item.referrer || 'direct';
+        
+        // Normalize referrer
+        let source = 'Direct';
+        
+        if (referrer === 'direct') {
+          source = 'Direct';
+        } else if (referrer.includes('google')) {
+          source = 'Google';
+        } else if (referrer.includes('facebook') || referrer.includes('fb.com')) {
+          source = 'Facebook';
+        } else if (referrer.includes('twitter') || referrer.includes('t.co')) {
+          source = 'Twitter';
+        } else if (referrer.includes('instagram')) {
+          source = 'Instagram';
+        } else if (referrer.includes('youtube')) {
+          source = 'YouTube';
+        } else if (referrer.includes('linkedin')) {
+          source = 'LinkedIn';
+        } else if (referrer.includes('bing')) {
+          source = 'Bing';
+        } else if (referrer.includes('yahoo')) {
+          source = 'Yahoo';
+        } else if (referrer !== 'direct') {
+          source = 'Other';
+        }
+        
+        referrers[source] = (referrers[source] || 0) + 1;
+        total++;
+      });
+      
+      // Convert to array and calculate percentages
+      const sources = Object.keys(referrers).map(name => {
+        const count = referrers[name];
+        const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+        
+        return {
+          name,
+          value: percentage,
+          count,
+          color: getColorForSource(name)
+        };
+      });
+      
+      // Sort by count
+      sources.sort((a, b) => b.count - a.count);
+      
+      return sources;
+    },
+    enabled: !!trackingId,
+  });
+  
+  const getColorForSource = (source) => {
+    const colors = {
+      'Direct': '#1d4ed8',
+      'Google': '#10b981',
+      'Facebook': '#3b5998',
+      'Twitter': '#1da1f2',
+      'Instagram': '#e1306c',
+      'YouTube': '#ff0000',
+      'LinkedIn': '#0077b5',
+      'Bing': '#ffb900',
+      'Yahoo': '#7B0099',
+      'Other': '#6b7280'
+    };
+    
+    return colors[source] || '#6b7280';
   };
 
   return (
@@ -30,42 +112,52 @@ export function TrafficSources() {
         <CardTitle>Traffic Sources</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        
-        <div className="mt-4 space-y-2">
-          {data.map((item, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div 
-                  className="w-3 h-3 rounded-full mr-2"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className="text-sm">{item.name}</span>
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center justify-between animate-pulse">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-muted mr-2"></div>
+                  <div className="h-4 w-24 bg-muted rounded"></div>
+                </div>
+                <div className="h-4 w-12 bg-muted rounded"></div>
               </div>
-              <span className="text-sm font-medium">{item.value}%</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No traffic source data available
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {data.map((source, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div 
+                      className="w-3 h-3 rounded-full mr-2"
+                      style={{ backgroundColor: source.color }}
+                    />
+                    <span className="text-sm font-medium">{source.name}</span>
+                  </div>
+                  <div className="text-sm font-medium flex items-center">
+                    <span className="mr-2">{source.count}</span>
+                    <span className="text-muted-foreground">{source.value}%</span>
+                  </div>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full" 
+                    style={{ 
+                      width: `${source.value}%`,
+                      backgroundColor: source.color 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -11,6 +11,7 @@ import { LogOut, User } from "lucide-react";
 
 const SettingsPage = () => {
   const [fullName, setFullName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -18,19 +19,24 @@ const SettingsPage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const user = (await supabase.auth.getUser()).data.user;
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          setUserEmail(user.email || "");
+          
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", user.id)
+            .single();
 
-        if (error && error.code !== "PGRST116") {
-          throw error;
-        }
+          if (error && error.code !== "PGRST116") {
+            throw error;
+          }
 
-        if (data) {
-          setFullName(data.full_name || "");
+          if (data) {
+            setFullName(data.full_name || "");
+          }
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -52,7 +58,10 @@ const SettingsPage = () => {
     setIsSaving(true);
 
     try {
-      const user = (await supabase.auth.getUser()).data.user;
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) throw new Error("User not authenticated");
+      
       const { error } = await supabase
         .from("profiles")
         .upsert({
@@ -123,7 +132,7 @@ const SettingsPage = () => {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  value={(supabase.auth.getUser())?.data?.user?.email || ""}
+                  value={userEmail}
                   disabled
                   readOnly
                 />

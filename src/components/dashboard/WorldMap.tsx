@@ -10,6 +10,11 @@ interface WorldMapProps {
   dateRange?: DateRange;
 }
 
+interface CountryData {
+  name: string;
+  count: number;
+}
+
 export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['country-metrics', trackingId, dateRange],
@@ -34,17 +39,19 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
       if (error) throw error;
       
       // Count countries but deduplicate by visitor_id
-      const visitorCountries = {};
+      const visitorCountries: Record<string, string> = {};
       data.forEach(item => {
-        if (!visitorCountries[item.visitor_id]) {
+        if (item.visitor_id && item.country && !visitorCountries[item.visitor_id]) {
           visitorCountries[item.visitor_id] = item.country;
         }
       });
       
       // Count occurrences of each country
-      const countryCounts = {};
+      const countryCounts: Record<string, number> = {};
       Object.values(visitorCountries).forEach(country => {
-        countryCounts[country] = (countryCounts[country] || 0) + 1;
+        if (country) {
+          countryCounts[country] = (countryCounts[country] || 0) + 1;
+        }
       });
       
       // Convert to array and sort
@@ -57,7 +64,7 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
     enabled: !!trackingId,
   });
 
-  const getColorForIndex = (index) => {
+  const getColorForIndex = (index: number) => {
     const colors = [
       '#1d4ed8', '#10b981', '#7c3aed', '#f59e0b', '#f43f5e',
       '#0891b2', '#84cc16', '#d946ef', '#64748b', '#dc2626'
@@ -87,7 +94,7 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
         ) : (
           <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {data.slice(0, 6).map((country, index) => (
+              {data.slice(0, 6).map((country: CountryData, index) => (
                 <div key={index} className="border rounded-md p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-medium truncate">{country.name}</div>
@@ -106,7 +113,7 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
               <div>
                 <h4 className="text-sm font-medium mb-2">Other Countries</h4>
                 <div className="space-y-2">
-                  {data.slice(6, 15).map((country, index) => (
+                  {data.slice(6, 15).map((country: CountryData, index) => (
                     <div key={index} className="flex justify-between items-center">
                       <div className="flex items-center">
                         <div 

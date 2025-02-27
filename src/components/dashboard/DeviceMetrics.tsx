@@ -11,6 +11,12 @@ interface DeviceMetricsProps {
   dateRange?: DateRange;
 }
 
+interface VisitorData {
+  browser: string | null;
+  os: string | null;
+  device: string | null;
+}
+
 export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['device-metrics', trackingId, dateRange],
@@ -34,11 +40,11 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
       if (error) throw error;
       
       // Process by visitor_id to avoid counting the same visitor multiple times
-      const uniqueVisitors = {};
+      const uniqueVisitors: Record<string, VisitorData> = {};
       
       data.forEach(item => {
-        if (!uniqueVisitors[item.visitor_id]) {
-          uniqueVisitors[item.visitor_id] = {
+        if (!uniqueVisitors[item.visitor_id as string]) {
+          uniqueVisitors[item.visitor_id as string] = {
             browser: item.browser,
             os: item.operating_system,
             device: item.device_type
@@ -49,21 +55,21 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
       const visitors = Object.values(uniqueVisitors);
       
       // Count devices
-      const deviceCounts = {};
+      const deviceCounts: Record<string, number> = {};
       visitors.forEach(visitor => {
         const device = visitor.device || 'Unknown';
         deviceCounts[device] = (deviceCounts[device] || 0) + 1;
       });
       
       // Count browsers
-      const browserCounts = {};
+      const browserCounts: Record<string, number> = {};
       visitors.forEach(visitor => {
         const browser = visitor.browser || 'Unknown';
         browserCounts[browser] = (browserCounts[browser] || 0) + 1;
       });
       
       // Count operating systems
-      const osCounts = {};
+      const osCounts: Record<string, number> = {};
       visitors.forEach(visitor => {
         const os = visitor.os || 'Unknown';
         osCounts[os] = (osCounts[os] || 0) + 1;
@@ -95,7 +101,7 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
     enabled: !!trackingId,
   });
 
-  const getColorForIndex = (index) => {
+  const getColorForIndex = (index: number) => {
     const colors = [
       '#1d4ed8', '#10b981', '#7c3aed', '#f59e0b', '#f43f5e',
       '#0891b2', '#84cc16', '#d946ef', '#64748b', '#dc2626'
@@ -103,7 +109,13 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
     return colors[index % colors.length];
   };
 
-  const renderDataTable = (items) => (
+  interface MetricItem {
+    name: string;
+    count: number;
+    value: number;
+  }
+
+  const renderDataTable = (items: MetricItem[] | undefined) => (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
       {items?.map((item, index) => (
         <div key={index} className="border rounded-md overflow-hidden">

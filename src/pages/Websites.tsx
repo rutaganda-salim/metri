@@ -197,9 +197,7 @@ const WebsitesPage = () => {
             <p className="text-muted-foreground mb-4">
               Add your first website to start tracking analytics.
             </p>
-            <DialogTrigger asChild>
-              <Button onClick={() => setOpen(true)}>Add Your First Website</Button>
-            </DialogTrigger>
+            <Button onClick={() => setOpen(true)}>Add Your First Website</Button>
           </CardContent>
         </Card>
       ) : (

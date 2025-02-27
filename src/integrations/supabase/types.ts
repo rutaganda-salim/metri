@@ -9,6 +9,94 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      active_visitors: {
+        Row: {
+          id: string
+          last_active: string | null
+          tracking_id: string
+          url: string
+          visitor_id: string
+        }
+        Insert: {
+          id?: string
+          last_active?: string | null
+          tracking_id: string
+          url: string
+          visitor_id: string
+        }
+        Update: {
+          id?: string
+          last_active?: string | null
+          tracking_id?: string
+          url?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_visitors_tracking_id_fkey"
+            columns: ["tracking_id"]
+            isOneToOne: false
+            referencedRelation: "users_tracking"
+            referencedColumns: ["tracking_id"]
+          },
+        ]
+      }
+      page_views: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          id: string
+          ip_address: string | null
+          is_unique: boolean | null
+          operating_system: string | null
+          referrer: string | null
+          tracking_id: string
+          url: string
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          is_unique?: boolean | null
+          operating_system?: string | null
+          referrer?: string | null
+          tracking_id: string
+          url: string
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          is_unique?: boolean | null
+          operating_system?: string | null
+          referrer?: string | null
+          tracking_id?: string
+          url?: string
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_views_tracking_id_fkey"
+            columns: ["tracking_id"]
+            isOneToOne: false
+            referencedRelation: "users_tracking"
+            referencedColumns: ["tracking_id"]
+          },
+        ]
+      }
       photos: {
         Row: {
           created_at: string | null
@@ -32,6 +120,60 @@ export type Database = {
           name?: string
           updated_at?: string | null
           url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      users_tracking: {
+        Row: {
+          created_at: string | null
+          id: string
+          site_name: string
+          site_url: string
+          tracking_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          site_name: string
+          site_url: string
+          tracking_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          site_name?: string
+          site_url?: string
+          tracking_id?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

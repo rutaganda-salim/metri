@@ -10,8 +10,15 @@ interface TrafficSourcesProps {
   dateRange?: DateRange;
 }
 
+interface SourceData {
+  name: string;
+  value: number;
+  count: number;
+  color: string;
+}
+
 export function TrafficSources({ trackingId, dateRange }: TrafficSourcesProps) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['traffic-sources', trackingId, dateRange],
     queryFn: async () => {
       if (!trackingId) return [];
@@ -30,46 +37,51 @@ export function TrafficSources({ trackingId, dateRange }: TrafficSourcesProps) {
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString());
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching traffic sources:", error);
+        throw error;
+      }
       
       // Process referrer data
-      const referrers = {};
+      const referrers: Record<string, number> = {};
       let total = 0;
       
-      data.forEach(item => {
-        const referrer = item.referrer || 'direct';
-        
-        // Normalize referrer
-        let source = 'Direct';
-        
-        if (referrer === 'direct') {
-          source = 'Direct';
-        } else if (referrer.includes('google')) {
-          source = 'Google';
-        } else if (referrer.includes('facebook') || referrer.includes('fb.com')) {
-          source = 'Facebook';
-        } else if (referrer.includes('twitter') || referrer.includes('t.co')) {
-          source = 'Twitter';
-        } else if (referrer.includes('instagram')) {
-          source = 'Instagram';
-        } else if (referrer.includes('youtube')) {
-          source = 'YouTube';
-        } else if (referrer.includes('linkedin')) {
-          source = 'LinkedIn';
-        } else if (referrer.includes('bing')) {
-          source = 'Bing';
-        } else if (referrer.includes('yahoo')) {
-          source = 'Yahoo';
-        } else if (referrer !== 'direct') {
-          source = 'Other';
-        }
-        
-        referrers[source] = (referrers[source] || 0) + 1;
-        total++;
-      });
+      if (data) {
+        data.forEach(item => {
+          const referrer = item.referrer || 'direct';
+          
+          // Normalize referrer
+          let source = 'Direct';
+          
+          if (referrer === 'direct') {
+            source = 'Direct';
+          } else if (referrer.includes('google')) {
+            source = 'Google';
+          } else if (referrer.includes('facebook') || referrer.includes('fb.com')) {
+            source = 'Facebook';
+          } else if (referrer.includes('twitter') || referrer.includes('t.co')) {
+            source = 'Twitter';
+          } else if (referrer.includes('instagram')) {
+            source = 'Instagram';
+          } else if (referrer.includes('youtube')) {
+            source = 'YouTube';
+          } else if (referrer.includes('linkedin')) {
+            source = 'LinkedIn';
+          } else if (referrer.includes('bing')) {
+            source = 'Bing';
+          } else if (referrer.includes('yahoo')) {
+            source = 'Yahoo';
+          } else if (referrer !== 'direct') {
+            source = 'Other';
+          }
+          
+          referrers[source] = (referrers[source] || 0) + 1;
+          total++;
+        });
+      }
       
       // Convert to array and calculate percentages
-      const sources = Object.keys(referrers).map(name => {
+      const sources: SourceData[] = Object.keys(referrers).map(name => {
         const count = referrers[name];
         const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
         
@@ -89,8 +101,8 @@ export function TrafficSources({ trackingId, dateRange }: TrafficSourcesProps) {
     enabled: !!trackingId,
   });
   
-  const getColorForSource = (source) => {
-    const colors = {
+  const getColorForSource = (source: string): string => {
+    const colors: Record<string, string> = {
       'Direct': '#1d4ed8',
       'Google': '#10b981',
       'Facebook': '#3b5998',
@@ -105,6 +117,22 @@ export function TrafficSources({ trackingId, dateRange }: TrafficSourcesProps) {
     
     return colors[source] || '#6b7280';
   };
+
+  if (error) {
+    console.error("TrafficSources error:", error);
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Traffic Sources</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-[300px] text-red-500">
+            Error loading traffic source data. Please try again later.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="h-full">

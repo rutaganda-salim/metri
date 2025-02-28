@@ -11,8 +11,44 @@ interface VisitorMetricsProps {
   dateRange: DateRange | undefined;
 }
 
+interface MetricsData {
+  totalVisitors: number;
+  pageViews: number;
+  avgSession: string;
+  bounceRate: string;
+  trends: {
+    visitors: {
+      value: number;
+      isPositive: boolean;
+    };
+    pageViews: {
+      value: number;
+      isPositive: boolean;
+    };
+    avgSession: {
+      value: number;
+      isPositive: boolean;
+    };
+    bounceRate: {
+      value: number;
+      isPositive: boolean;
+    };
+  };
+}
+
+interface MetricItem {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  description: string;
+  trend?: {
+    value: number;
+    isPositive: boolean;
+  };
+}
+
 export function VisitorMetrics({ trackingId, dateRange }: VisitorMetricsProps) {
-  const { data: metricsData, isLoading } = useQuery({
+  const { data: metricsData, isLoading, error } = useQuery<MetricsData | null>({
     queryKey: ['visitor-metrics', trackingId, dateRange],
     queryFn: async () => {
       if (!trackingId) return null;
@@ -32,7 +68,10 @@ export function VisitorMetrics({ trackingId, dateRange }: VisitorMetricsProps) {
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString());
       
-      if (currentError) throw currentError;
+      if (currentError) {
+        console.error("Error fetching current period data:", currentError);
+        throw currentError;
+      }
       
       // Previous period (same duration)
       const durationMs = to.getTime() - from.getTime();
@@ -46,28 +85,35 @@ export function VisitorMetrics({ trackingId, dateRange }: VisitorMetricsProps) {
         .gte("created_at", prevFrom.toISOString())
         .lte("created_at", prevTo.toISOString());
       
-      if (prevError) throw prevError;
+      if (prevError) {
+        console.error("Error fetching previous period data:", prevError);
+        throw prevError;
+      }
       
       // Calculate metrics
-      const currentPageViews = currentPeriodData.length;
-      const prevPageViews = prevPeriodData.length;
+      const currentPageViews = currentPeriodData?.length || 0;
+      const prevPageViews = prevPeriodData?.length || 0;
       
-      const currentUniqueVisitors = new Set(currentPeriodData.map(pv => pv.visitor_id)).size;
-      const prevUniqueVisitors = new Set(prevPeriodData.map(pv => pv.visitor_id)).size;
+      const currentUniqueVisitors = new Set(currentPeriodData?.map(pv => pv.visitor_id) || []).size;
+      const prevUniqueVisitors = new Set(prevPeriodData?.map(pv => pv.visitor_id) || []).size;
       
       // Calculate bounce rate (visitors who only viewed one page)
-      const visitorPageCounts = {};
-      currentPeriodData.forEach(pv => {
-        visitorPageCounts[pv.visitor_id] = (visitorPageCounts[pv.visitor_id] || 0) + 1;
+      const visitorPageCounts: Record<string, number> = {};
+      currentPeriodData?.forEach(pv => {
+        if (pv.visitor_id) {
+          visitorPageCounts[pv.visitor_id] = (visitorPageCounts[pv.visitor_id] || 0) + 1;
+        }
       });
       
       const singlePageVisitors = Object.values(visitorPageCounts).filter(count => count === 1).length;
       const totalVisitors = Object.keys(visitorPageCounts).length;
       const bounceRate = totalVisitors ? (singlePageVisitors / totalVisitors) * 100 : 0;
       
-      const prevVisitorPageCounts = {};
-      prevPeriodData.forEach(pv => {
-        prevVisitorPageCounts[pv.visitor_id] = (prevVisitorPageCounts[pv.visitor_id] || 0) + 1;
+      const prevVisitorPageCounts: Record<string, number> = {};
+      prevPeriodData?.forEach(pv => {
+        if (pv.visitor_id) {
+          prevVisitorPageCounts[pv.visitor_id] = (prevVisitorPageCounts[pv.visitor_id] || 0) + 1;
+        }
       });
       
       const prevSinglePageVisitors = Object.values(prevVisitorPageCounts).filter(count => count === 1).length;
@@ -85,7 +131,7 @@ export function VisitorMetrics({ trackingId, dateRange }: VisitorMetricsProps) {
       const bounceRateTrend = prevBounceRate ? ((bounceRate - prevBounceRate) / prevBounceRate) * 100 : 0;
       
       // Format session time
-      const formatTime = (seconds) => {
+      const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
         return `${minutes}m ${remainingSeconds}s`;
@@ -119,7 +165,11 @@ export function VisitorMetrics({ trackingId, dateRange }: VisitorMetricsProps) {
     enabled: !!trackingId,
   });
   
-  const metrics = [
+  if (error) {
+    console.error("VisitorMetrics error:", error);
+  }
+  
+  const metrics: MetricItem[] = [
     {
       title: "Total Visitors",
       value: isLoading ? "-" : metricsData?.totalVisitors || 0,

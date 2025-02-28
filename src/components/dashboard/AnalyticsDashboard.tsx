@@ -23,13 +23,22 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { DateRange } from "react-day-picker";
-import { ActivitySquare } from "lucide-react";
+import { ActivitySquare, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
+interface Website {
+  id: string;
+  tracking_id: string;
+  site_name: string;
+  site_url: string;
+  created_at?: string;
+  updated_at?: string;
+  user_id?: string;
+}
+
 export function AnalyticsDashboard() {
-  const [selectedSite, setSelectedSite] = useState("all");
-  const [websites, setWebsites] = useState([]);
-  const [activeVisitors, setActiveVisitors] = useState(0);
+  const [selectedSite, setSelectedSite] = useState<string>("all");
+  const [activeVisitors, setActiveVisitors] = useState<number>(0);
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(new Date().setDate(new Date().getDate() - 7)),
@@ -41,7 +50,7 @@ export function AnalyticsDashboard() {
   };
 
   // Fetch user's websites
-  const { data: websitesData, isLoading: websitesLoading } = useQuery({
+  const { data: websitesData, isLoading: websitesLoading, error: websitesError } = useQuery<Website[]>({
     queryKey: ['websites'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -49,16 +58,29 @@ export function AnalyticsDashboard() {
         .select("*")
         .order("created_at", { ascending: false });
       
-      if (error) throw error;
-      setWebsites(data || []);
-      
-      if (data && data.length > 0 && selectedSite === "all") {
-        setSelectedSite(data[0].tracking_id);
+      if (error) {
+        console.error("Error fetching websites:", error);
+        throw error;
       }
       
       return data || [];
+    },
+    onSuccess: (data) => {
+      if (data && data.length > 0 && selectedSite === "all") {
+        setSelectedSite(data[0].tracking_id);
+      }
+    },
+    onError: (error) => {
+      console.error("Error in websites query:", error);
+      toast({
+        title: "Error loading websites",
+        description: "Failed to load your websites. Please try again later.",
+        variant: "destructive",
+      });
     }
   });
+  
+  const websites = websitesData || [];
 
   // Fetch active visitors count
   useEffect(() => {
@@ -76,10 +98,18 @@ export function AnalyticsDashboard() {
           .eq("tracking_id", selectedSite)
           .gte("last_active", fiveMinutesAgo.toISOString());
           
-        if (error) throw error;
-        setActiveVisitors(data.length);
+        if (error) {
+          console.error("Error fetching active visitors:", error);
+          throw error;
+        }
+        setActiveVisitors(data?.length || 0);
       } catch (error) {
         console.error("Error fetching active visitors:", error);
+        toast({
+          title: "Error loading active visitors",
+          description: "Failed to load active visitors data. Please try again later.",
+          variant: "destructive",
+        });
       }
     };
 
@@ -105,10 +135,30 @@ export function AnalyticsDashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedSite]);
+  }, [selectedSite, toast]);
 
   // Check if the user has any websites
   const noWebsites = !websitesLoading && (!websites || websites.length === 0);
+
+  if (websitesError) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+          <p className="text-muted-foreground">Monitor your web traffic and visitor insights</p>
+        </div>
+        <Card className="border border-red-500/20 bg-red-500/5">
+          <CardContent className="flex items-center gap-4 py-6">
+            <AlertCircle className="h-6 w-6 text-red-500" />
+            <div>
+              <h3 className="font-semibold">Error loading dashboard</h3>
+              <p className="text-sm text-muted-foreground">There was a problem loading your dashboard data. Please try again later.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (noWebsites) {
     return (
@@ -177,20 +227,24 @@ export function AnalyticsDashboard() {
         </CardContent>
       </Card>
 
-      <VisitorMetrics trackingId={selectedSite} dateRange={dateRange} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <TimeChart trackingId={selectedSite} dateRange={dateRange} />
-        </div>
-        <div>
-          <TrafficSources trackingId={selectedSite} dateRange={dateRange} />
-        </div>
-      </div>
-      
-      <WorldMap trackingId={selectedSite} dateRange={dateRange} />
-      
-      <DeviceMetrics trackingId={selectedSite} dateRange={dateRange} />
+      {selectedSite && selectedSite !== "all" && (
+        <>
+          <VisitorMetrics trackingId={selectedSite} dateRange={dateRange} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <TimeChart trackingId={selectedSite} dateRange={dateRange} />
+            </div>
+            <div>
+              <TrafficSources trackingId={selectedSite} dateRange={dateRange} />
+            </div>
+          </div>
+          
+          <WorldMap trackingId={selectedSite} dateRange={dateRange} />
+          
+          <DeviceMetrics trackingId={selectedSite} dateRange={dateRange} />
+        </>
+      )}
     </div>
   );
 }

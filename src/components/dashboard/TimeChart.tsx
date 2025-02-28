@@ -22,7 +22,7 @@ interface TimeChartProps {
 }
 
 export function TimeChart({ trackingId, dateRange }: TimeChartProps) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['time-chart', trackingId, dateRange],
     queryFn: async () => {
       if (!trackingId) return [];
@@ -41,7 +41,10 @@ export function TimeChart({ trackingId, dateRange }: TimeChartProps) {
         .gte("created_at", from.toISOString())
         .lte("created_at", to.toISOString());
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching time chart data:", error);
+        throw error;
+      }
       
       // Generate all days in the date range
       const days = eachDayOfInterval({ start: from, end: to });
@@ -51,17 +54,17 @@ export function TimeChart({ trackingId, dateRange }: TimeChartProps) {
         const dayFormatted = format(day, "MMM d");
         
         // Count page views for this day
-        const pageViews = data.filter(item => {
-          const itemDate = new Date(item.created_at);
+        const pageViews = data ? data.filter(item => {
+          const itemDate = new Date(item.created_at as string);
           return isSameDay(itemDate, day);
-        }).length;
+        }).length : 0;
         
         // Count unique visitors for this day
         const visitors = new Set(
-          data.filter(item => {
-            const itemDate = new Date(item.created_at);
+          data ? data.filter(item => {
+            const itemDate = new Date(item.created_at as string);
             return isSameDay(itemDate, day);
-          }).map(item => item.visitor_id)
+          }).map(item => item.visitor_id) : []
         ).size;
         
         return {
@@ -98,6 +101,22 @@ export function TimeChart({ trackingId, dateRange }: TimeChartProps) {
     }
     return null;
   };
+
+  if (error) {
+    console.error("TimeChart error:", error);
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Traffic Over Time</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-[300px] text-red-500">
+            Error loading chart data. Please try again later.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="h-full">

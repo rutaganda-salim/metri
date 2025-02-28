@@ -65,20 +65,29 @@ export function AnalyticsDashboard() {
       
       return data || [];
     },
-    onSuccess: (data) => {
-      if (data && data.length > 0 && selectedSite === "all") {
-        setSelectedSite(data[0].tracking_id);
+    meta: {
+      onSuccess: (data) => {
+        if (data && data.length > 0 && selectedSite === "all") {
+          setSelectedSite(data[0].tracking_id);
+        }
+      },
+      onError: (error) => {
+        console.error("Error in websites query:", error);
+        toast({
+          title: "Error loading websites",
+          description: "Failed to load your websites. Please try again later.",
+          variant: "destructive",
+        });
       }
-    },
-    onError: (error) => {
-      console.error("Error in websites query:", error);
-      toast({
-        title: "Error loading websites",
-        description: "Failed to load your websites. Please try again later.",
-        variant: "destructive",
-      });
     }
   });
+  
+  // Update selected site when websites data is loaded
+  useEffect(() => {
+    if (websitesData && websitesData.length > 0 && selectedSite === "all") {
+      setSelectedSite(websitesData[0].tracking_id);
+    }
+  }, [websitesData, selectedSite]);
   
   const websites = websitesData || [];
 
@@ -102,7 +111,7 @@ export function AnalyticsDashboard() {
           console.error("Error fetching active visitors:", error);
           throw error;
         }
-        setActiveVisitors(data?.length || 0);
+        setActiveVisitors(data ? data.length : 0);
       } catch (error) {
         console.error("Error fetching active visitors:", error);
         toast({
@@ -198,7 +207,7 @@ export function AnalyticsDashboard() {
               <SelectValue placeholder="Select website" />
             </SelectTrigger>
             <SelectContent>
-              {websites.map((site) => (
+              {websites && websites.map((site) => (
                 <SelectItem key={site.id} value={site.tracking_id}>
                   {site.site_name}
                 </SelectItem>

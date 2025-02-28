@@ -12,6 +12,7 @@ import AuthPage from "./pages/Auth";
 import WebsitesPage from "./pages/Websites";
 import ScriptPage from "./pages/Script";
 import SettingsPage from "./pages/Settings";
+import Landing from "./pages/Landing";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -52,9 +53,10 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/auth" element={session ? <Navigate to="/" /> : <AuthPage />} />
+            <Route path="/" element={session ? <Navigate to="/dashboard" /> : <Landing />} />
+            <Route path="/auth" element={session ? <Navigate to="/dashboard" /> : <AuthPage />} />
             <Route 
-              path="/" 
+              path="/dashboard" 
               element={
                 <ProtectedRoute session={session}>
                   <Index />

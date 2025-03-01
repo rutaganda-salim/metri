@@ -54,7 +54,7 @@ export function DashboardSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-border/50">
+    <Sidebar className="border-r border-border/50 bg-white text-gray-800">
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
           <Zap className="w-6 h-6 text-blue-500" />
@@ -65,7 +65,7 @@ export function DashboardSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem className={isActive("/dashboard") ? "bg-accent" : ""}>
+              <SidebarMenuItem className={isActive("/dashboard") ? "bg-gray-100" : ""}>
                 <SidebarMenuButton asChild>
                   <a href="/dashboard">
                     <LayoutDashboard className="w-4 h-4" />
@@ -73,7 +73,7 @@ export function DashboardSidebar() {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem className={isActive("/websites") ? "bg-accent" : ""}>
+              <SidebarMenuItem className={isActive("/websites") ? "bg-gray-100" : ""}>
                 <SidebarMenuButton asChild>
                   <a href="/websites">
                     <Globe className="w-4 h-4" />
@@ -86,7 +86,7 @@ export function DashboardSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-600">Analytics</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -126,10 +126,10 @@ export function DashboardSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-gray-600">Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem className={isActive("/settings") ? "bg-accent" : ""}>
+              <SidebarMenuItem className={isActive("/settings") ? "bg-gray-100" : ""}>
                 <SidebarMenuButton asChild>
                   <a href="/settings">
                     <Settings className="w-4 h-4" />
@@ -148,7 +148,7 @@ export function DashboardSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4">
-        <div className="text-xs text-muted-foreground">Pulse Analytics v1.0</div>
+        <div className="text-xs text-gray-500">Pulse Analytics v1.0</div>
       </SidebarFooter>
     </Sidebar>
   );

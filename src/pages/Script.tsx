@@ -11,7 +11,7 @@ import { Copy, ArrowLeft, Check } from "lucide-react";
 const ScriptPage = () => {
   const { id } = useParams();
   const [website, setWebsite] = useState(null);
-  const [script, setScript] = useState("");
+  const [cdnScriptUrl, setCdnScriptUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -28,16 +28,16 @@ const ScriptPage = () => {
         if (error) throw error;
         setWebsite(data);
 
-        // Generate tracking script
+        // Get CDN script URL
         const { data: scriptData, error: scriptError } = await supabase.functions.invoke(
           "generate-tracking-script",
           {
-            body: { trackingId: data.tracking_id },
+            body: { trackingId: data.tracking_id, cdn: true },
           }
         );
 
         if (scriptError) throw scriptError;
-        setScript(scriptData.script);
+        setCdnScriptUrl(scriptData.cdnUrl);
       } catch (error) {
         console.error("Error fetching website:", error);
         toast({
@@ -54,7 +54,7 @@ const ScriptPage = () => {
   }, [id]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`<script>${script}</script>`);
+    navigator.clipboard.writeText(`<script src="${cdnScriptUrl}"></script>`);
     setCopied(true);
     toast({
       title: "Copied to clipboard",
@@ -110,7 +110,7 @@ const ScriptPage = () => {
         <CardContent className="space-y-4">
           <div className="relative">
             <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-              <code>{`<script>${script}</script>`}</code>
+              <code>{`<script src="${cdnScriptUrl}"></script>`}</code>
             </pre>
             <Button
               variant="secondary"

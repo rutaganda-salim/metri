@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,19 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Zap } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Mail, ArrowLeft, Zap } from "lucide-react";
 
 const AuthPage = () => {
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get("tab") === "register" ? "register" : "login";
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -34,49 +31,24 @@ const AuthPage = () => {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
         options: {
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          redirectTo: `${window.location.origin}/`,
+          // Store full name in user metadata
           data: {
             full_name: fullName,
-          },
-        },
+          }
+        }
       });
       
       if (error) throw error;
       
-      toast({
-        title: "Account created!",
-        description: "Check your email for the confirmation link.",
-      });
-
-      // Automatically switch to login tab
-      setActiveTab("login");
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      // Redirect will happen automatically through App.tsx
+      // Redirect happens automatically with OAuth
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -244,62 +216,10 @@ const AuthPage = () => {
                     </div>
                     <Button 
                       type="submit" 
-                      className="w-full mt-4 bg-sidebar-primary hover:bg-sidebar-primary/90 text-white" 
+                      className="w-full mt-4 bg-black hover:bg-black/90 text-white" 
                       disabled={isLoading}
                     >
                       {isLoading ? "Sending..." : "Send Magic Link"}
-                    </Button>
-                  </form>
-                  
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <Separator className="w-full" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        Or sign in with password
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <form onSubmit={handleSignIn}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Input
-                          id="email"
-                          placeholder="Email"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                          className="bg-input/10"
-                        />
-                      </div>
-                      <div className="space-y-2 relative">
-                        <Input
-                          id="password"
-                          placeholder="Password"
-                          type={showPassword ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                          className="bg-input/10"
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-3 top-2.5 text-muted-foreground"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                      </div>
-                    </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full mt-4 bg-sidebar-primary hover:bg-sidebar-primary/90 text-white" 
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Signing in..." : "Sign In"}
                     </Button>
                   </form>
                 </CardContent>
@@ -344,7 +264,7 @@ const AuthPage = () => {
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
                         <span className="bg-card px-2 text-muted-foreground">
-                          Or register with email
+                          Or continue with
                         </span>
                       </div>
                     </div>
@@ -371,32 +291,14 @@ const AuthPage = () => {
                         className="bg-input/10"
                       />
                     </div>
-                    <div className="space-y-2 relative">
-                      <Input
-                        id="password"
-                        placeholder="Password"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="bg-input/10"
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-2.5 text-muted-foreground"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
                   </CardContent>
                   <CardFooter>
                     <Button 
                       type="submit" 
-                      className="w-full bg-sidebar-primary hover:bg-sidebar-primary/90 text-white" 
+                      className="w-full bg-black hover:bg-black/90 text-white" 
                       disabled={isLoading}
                     >
-                      {isLoading ? "Creating account..." : "Create Account"}
+                      {isLoading ? "Creating account..." : "Continue with Magic Link"}
                     </Button>
                   </CardFooter>
                 </form>

@@ -1,151 +1,107 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const cdnBaseUrl = "https://cdn.example.com/tracking"; // Replace with your actual CDN URL in production
+
 serve(async (req) => {
-  // Handle CORS preflight request
+  // Handle CORS
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: corsHeaders,
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { trackingId } = await req.json();
+    const { trackingId, cdn = false } = await req.json();
 
     if (!trackingId) {
       return new Response(
-        JSON.stringify({ error: "Tracking ID is required" }),
+        JSON.stringify({
+          error: "Missing tracking ID",
+        }),
         {
           status: 400,
-          headers: {
-            "Content-Type": "application/json",
-            ...corsHeaders,
-          },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
-    // Generate a script that will send page view data
+    // Generate the tracking script
     const script = `
-(function() {
-  // Configuration
-  const TRACKING_ID = "${trackingId}";
-  const TRACKING_API = "${Deno.env.get("SUPABASE_URL")}/functions/v1/track-pageview";
+      (function() {
+        const trackingId = "${trackingId}";
+        const apiUrl = "${Deno.env.get("SUPABASE_URL")}/functions/v1/track-pageview";
+        
+        function trackPageView() {
+          const data = {
+            trackingId: trackingId,
+            url: window.location.href,
+            referrer: document.referrer || null,
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            screenWidth: window.screen.width,
+            screenHeight: window.screen.height,
+            title: document.title
+          };
+          
+          fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          }).catch(err => console.error('Analytics error:', err));
+        }
+        
+        // Track the initial page view
+        trackPageView();
+        
+        // Track page views when the history state changes
+        window.addEventListener('popstate', trackPageView);
+        
+        // Monkey patch pushState and replaceState to track page views
+        const originalPushState = history.pushState;
+        history.pushState = function() {
+          originalPushState.apply(this, arguments);
+          trackPageView();
+        };
+        
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function() {
+          originalReplaceState.apply(this, arguments);
+          trackPageView();
+        };
+      })();
+    `;
 
-  // Get or create a visitor ID
-  function getOrCreateVisitorId() {
-    const storageKey = "pulse_analytics_visitor_id";
-    let visitorId = localStorage.getItem(storageKey);
+    // For CDN usage, we would save this script to a CDN and return the URL
+    // This is a mock implementation - in a real scenario, you would:
+    // 1. Upload the script to an actual CDN or static hosting
+    // 2. Return the permanent URL to that script
+
+    const cdnUrl = `${cdnBaseUrl}/${trackingId}.js`;
     
-    if (!visitorId) {
-      visitorId = generateUUID();
-      localStorage.setItem(storageKey, visitorId);
-    }
-    
-    return visitorId;
-  }
-
-  // Generate a UUID
-  function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-
-  // Send a page view to the API
-  async function trackPageView() {
-    try {
-      const visitorId = getOrCreateVisitorId();
-      const data = {
-        tracking_id: TRACKING_ID,
-        visitor_id: visitorId,
-        url: window.location.href,
-        referrer: document.referrer || "",
-        screen_width: window.screen.width,
-        screen_height: window.screen.height,
-        language: navigator.language || "",
-        title: document.title
-      };
-
-      const response = await fetch(TRACKING_API, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to track page view');
-      }
-    } catch (error) {
-      console.error('Error tracking page view:', error);
-    }
-  }
-
-  // Track page views on load and on navigation changes
-  function initializeTracking() {
-    // Track the initial page view
-    trackPageView();
-
-    // Track page views when the history changes
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function() {
-      originalPushState.apply(this, arguments);
-      setTimeout(trackPageView, 100);
-    };
-
-    history.replaceState = function() {
-      originalReplaceState.apply(this, arguments);
-      setTimeout(trackPageView, 100);
-    };
-
-    // Track page views when the user navigates back/forward
-    window.addEventListener('popstate', function() {
-      setTimeout(trackPageView, 100);
-    });
-  }
-
-  // Initialize when the DOM is ready
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initializeTracking();
-  } else {
-    document.addEventListener('DOMContentLoaded', initializeTracking);
-  }
-})();
-`.trim();
-
     return new Response(
-      JSON.stringify({ script }),
+      JSON.stringify({
+        script,
+        cdnUrl,
+      }),
       {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   } catch (error) {
-    console.error("Error generating tracking script:", error);
-    
     return new Response(
-      JSON.stringify({ error: "Failed to generate tracking script" }),
+      JSON.stringify({
+        error: error.message,
+      }),
       {
         status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }

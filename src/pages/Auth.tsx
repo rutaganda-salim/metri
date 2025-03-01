@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const AuthPage = () => {
@@ -142,46 +142,49 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-12 bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen items-center justify-center px-4 py-12 bg-gray-900 text-white">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+        <Link to="/" className="flex items-center text-sm text-gray-400 hover:text-white mb-6 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>
         
-        <Card className="border-none shadow-lg">
+        <Card className="border-gray-700 bg-gray-800 shadow-lg">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold">Pulse Analytics</CardTitle>
-            <CardDescription>Sign in or create an account to manage your website analytics</CardDescription>
+            <div className="flex items-center justify-center mb-2">
+              <Zap className="h-8 w-8 text-blue-400 mr-2" />
+              <CardTitle className="text-2xl font-bold">Pulse Analytics</CardTitle>
+            </div>
+            <CardDescription className="text-gray-400">Sign in or create an account to manage your website analytics</CardDescription>
           </CardHeader>
           
           {isMagicLinkSent ? (
             <CardContent className="space-y-4 pt-4">
               <div className="text-center space-y-4">
-                <div className="mx-auto bg-blue-100 dark:bg-blue-900 w-16 h-16 rounded-full flex items-center justify-center">
-                  <Mail className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <div className="mx-auto bg-blue-900/50 w-16 h-16 rounded-full flex items-center justify-center">
+                  <Mail className="h-8 w-8 text-blue-400" />
                 </div>
                 <h3 className="text-xl font-medium">Check your email</h3>
-                <p className="text-muted-foreground">
+                <p className="text-gray-300">
                   We've sent a magic link to <span className="font-medium">{email}</span>
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-400">
                   Click the link in the email to sign in
                 </p>
               </div>
               <Button 
                 variant="outline" 
-                className="w-full"
+                className="w-full border-gray-700 bg-gray-700/50 text-white hover:bg-gray-600"
                 onClick={() => setIsMagicLinkSent(false)}
               >
                 Go back
               </Button>
             </CardContent>
           ) : (
-            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
+            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-gray-700/50">
+                <TabsTrigger value="login" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Login</TabsTrigger>
+                <TabsTrigger value="register" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Register</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -190,7 +193,7 @@ const AuthPage = () => {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      className="w-full flex items-center justify-center"
+                      className="w-full flex items-center justify-center border-gray-700 bg-gray-700/50 text-white hover:bg-gray-600"
                       onClick={handleGoogleSignIn}
                       disabled={isLoading}
                     >
@@ -218,10 +221,10 @@ const AuthPage = () => {
                   
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <Separator className="w-full" />
+                      <Separator className="w-full bg-gray-700" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
+                      <span className="bg-gray-800 px-2 text-gray-400">
                         Or continue with
                       </span>
                     </div>
@@ -236,19 +239,24 @@ const AuthPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        className="bg-gray-700/50 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
-                    <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+                    <Button 
+                      type="submit" 
+                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700" 
+                      disabled={isLoading}
+                    >
                       {isLoading ? "Sending..." : "Send Magic Link"}
                     </Button>
                   </form>
                   
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
-                      <Separator className="w-full" />
+                      <Separator className="w-full bg-gray-700" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
+                      <span className="bg-gray-800 px-2 text-gray-400">
                         Or sign in with password
                       </span>
                     </div>
@@ -264,6 +272,7 @@ const AuthPage = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
+                          className="bg-gray-700/50 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
                         />
                       </div>
                       <div className="space-y-2 relative">
@@ -274,17 +283,22 @@ const AuthPage = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
+                          className="bg-gray-700/50 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
                         />
                         <button
                           type="button"
-                          className="absolute right-3 top-2.5 text-muted-foreground"
+                          className="absolute right-3 top-2.5 text-gray-400"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                       </div>
                     </div>
-                    <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+                    <Button 
+                      type="submit" 
+                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700" 
+                      disabled={isLoading}
+                    >
                       {isLoading ? "Signing in..." : "Sign In"}
                     </Button>
                   </form>
@@ -298,7 +312,7 @@ const AuthPage = () => {
                       <Button 
                         type="button" 
                         variant="outline" 
-                        className="w-full flex items-center justify-center"
+                        className="w-full flex items-center justify-center border-gray-700 bg-gray-700/50 text-white hover:bg-gray-600"
                         onClick={handleGoogleSignIn}
                         disabled={isLoading}
                       >
@@ -326,10 +340,10 @@ const AuthPage = () => {
                     
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <Separator className="w-full" />
+                        <Separator className="w-full bg-gray-700" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-card px-2 text-muted-foreground">
+                        <span className="bg-gray-800 px-2 text-gray-400">
                           Or register with email
                         </span>
                       </div>
@@ -343,6 +357,7 @@ const AuthPage = () => {
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         required
+                        className="bg-gray-700/50 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -353,6 +368,7 @@ const AuthPage = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        className="bg-gray-700/50 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                     <div className="space-y-2 relative">
@@ -363,10 +379,11 @@ const AuthPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        className="bg-gray-700/50 border-gray-600 text-white focus:ring-blue-500 focus:border-blue-500"
                       />
                       <button
                         type="button"
-                        className="absolute right-3 top-2.5 text-muted-foreground"
+                        className="absolute right-3 top-2.5 text-gray-400"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -374,7 +391,11 @@ const AuthPage = () => {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-blue-600 hover:bg-blue-700" 
+                      disabled={isLoading}
+                    >
                       {isLoading ? "Creating account..." : "Create Account"}
                     </Button>
                   </CardFooter>

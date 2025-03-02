@@ -11,7 +11,7 @@ import { Copy, ArrowLeft, Check } from "lucide-react";
 const ScriptPage = () => {
   const { id } = useParams();
   const [website, setWebsite] = useState(null);
-  const [cdnScriptUrl, setCdnScriptUrl] = useState("");
+  const [scriptData, setScriptData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -28,8 +28,8 @@ const ScriptPage = () => {
         if (error) throw error;
         setWebsite(data);
 
-        // Get CDN script URL
-        const { data: scriptData, error: scriptError } = await supabase.functions.invoke(
+        // Get script data
+        const { data: scriptResult, error: scriptError } = await supabase.functions.invoke(
           "generate-tracking-script",
           {
             body: { trackingId: data.tracking_id, cdn: true },
@@ -37,7 +37,7 @@ const ScriptPage = () => {
         );
 
         if (scriptError) throw scriptError;
-        setCdnScriptUrl(scriptData.cdnUrl);
+        setScriptData(scriptResult);
       } catch (error) {
         console.error("Error fetching website:", error);
         toast({
@@ -53,8 +53,19 @@ const ScriptPage = () => {
     fetchWebsite();
   }, [id]);
 
+  const getScriptTag = () => {
+    if (!scriptData || !website) return "";
+    
+    return `<script
+  defer
+  data-website-id="${website.tracking_id}"
+  data-domain="${website.domain || window.location.hostname}"
+  src="${scriptData.cdnUrl}">
+</script>`;
+  };
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(`<script src="${cdnScriptUrl}"></script>`);
+    navigator.clipboard.writeText(getScriptTag());
     setCopied(true);
     toast({
       title: "Copied to clipboard",
@@ -110,7 +121,7 @@ const ScriptPage = () => {
         <CardContent className="space-y-4">
           <div className="relative">
             <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-              <code>{`<script src="${cdnScriptUrl}"></script>`}</code>
+              <code>{getScriptTag()}</code>
             </pre>
             <Button
               variant="secondary"

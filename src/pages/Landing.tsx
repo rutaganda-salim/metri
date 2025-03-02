@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -542,7 +541,7 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="max-w-3xl mx-auto space-y-6">
             {[
               {
                 question: "Is your analytics platform GDPR compliant?",
@@ -569,19 +568,28 @@ const Landing = () => {
                 answer: "Yes, all paid plans allow you to export your analytics data in CSV, JSON, or PDF formats. You can also schedule regular exports to be sent to your email."
               }
             ].map((faq, index) => (
-              <div key={index} className="faq-card">
-                <div 
-                  className="faq-question" 
+              <div 
+                key={index} 
+                className="border border-border rounded-lg overflow-hidden transition-all duration-200 hover:border-foreground/20"
+              >
+                <button
                   onClick={() => toggleFaq(index)}
+                  className="w-full px-6 py-4 flex justify-between items-center focus:outline-none"
                 >
-                  <span>{faq.question}</span>
-                  <ChevronDown className={`h-5 w-5 transition-transform ${openFaqIndex === index ? 'rotate-180' : ''}`} />
-                </div>
-                {openFaqIndex === index && (
-                  <div className="faq-answer">
-                    {faq.answer}
+                  <h3 className="text-left font-medium text-lg">{faq.question}</h3>
+                  <div className={`transition-transform duration-200 ${openFaqIndex === index ? 'rotate-180' : ''}`}>
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
                   </div>
-                )}
+                </button>
+                <div 
+                  className={`px-6 overflow-hidden transition-all duration-300 ${
+                    openFaqIndex === index 
+                      ? 'max-h-96 py-4 opacity-100' 
+                      : 'max-h-0 py-0 opacity-0'
+                  }`}
+                >
+                  <p className="text-muted-foreground">{faq.answer}</p>
+                </div>
               </div>
             ))}
           </div>

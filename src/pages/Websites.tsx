@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layouts/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { PlusCircle, Globe, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const WebsitesPage = () => {
   const [websites, setWebsites] = useState([]);
@@ -17,6 +17,8 @@ const WebsitesPage = () => {
   const [open, setOpen] = useState(false);
   const [siteName, setSiteName] = useState("");
   const [siteUrl, setSiteUrl] = useState("");
+  const [deleteWebsiteId, setDeleteWebsiteId] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const fetchWebsites = async () => {
@@ -56,7 +58,6 @@ const WebsitesPage = () => {
       return;
     }
 
-    // Ensure URL has proper format
     let formattedUrl = siteUrl;
     if (!formattedUrl.startsWith("http://") && !formattedUrl.startsWith("https://")) {
       formattedUrl = `https://${formattedUrl}`;
@@ -99,10 +100,9 @@ const WebsitesPage = () => {
     }
   };
 
-  const handleDeleteWebsite = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this website?")) return;
-    
+  const handleDeleteWebsite = async (id) => {
     try {
+      setIsLoading(true);
       const { error } = await supabase
         .from("users_tracking")
         .delete()
@@ -110,6 +110,7 @@ const WebsitesPage = () => {
 
       if (error) throw error;
       
+      setDeleteDialogOpen(false);
       fetchWebsites();
       toast({
         title: "Website deleted successfully",
@@ -121,6 +122,8 @@ const WebsitesPage = () => {
         title: "Error deleting website",
         description: error.message,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -176,6 +179,26 @@ const WebsitesPage = () => {
         </Dialog>
       </div>
 
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this website and all its analytics data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteWebsiteId && handleDeleteWebsite(deleteWebsiteId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {isLoading ? (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
@@ -211,7 +234,10 @@ const WebsitesPage = () => {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 text-destructive"
-                    onClick={() => handleDeleteWebsite(website.id)}
+                    onClick={() => {
+                      setDeleteWebsiteId(website.id);
+                      setDeleteDialogOpen(true);
+                    }}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

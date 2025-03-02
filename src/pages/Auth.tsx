@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,10 +38,8 @@ const AuthPage = () => {
             prompt: 'consent',
           },
           redirectTo: `${window.location.origin}/`,
-          // Store full name in user metadata
-          data: {
-            full_name: fullName,
-          }
+          // Store full name metadata via the Supabase API directly
+          // This needs to be configured on the Google Auth provider side
         }
       });
       

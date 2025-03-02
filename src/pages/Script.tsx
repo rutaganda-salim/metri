@@ -60,7 +60,7 @@ const ScriptPage = () => {
   defer
   data-website-id="${website.tracking_id}"
   data-domain="${website.domain || window.location.hostname}"
-  src="${scriptData.cdnUrl}">
+  src="/js/script.js">
 </script>`;
   };
 

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,7 +36,6 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
       const from = dateRange?.from ? new Date(dateRange.from) : new Date(new Date().setDate(new Date().getDate() - 7));
       const to = dateRange?.to ? new Date(dateRange.to) : new Date();
       
-      // Set the time to cover the full day
       from.setHours(0, 0, 0, 0);
       to.setHours(23, 59, 59, 999);
       
@@ -50,7 +48,6 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
       
       if (error) throw error;
       
-      // Process by visitor_id to avoid counting the same visitor multiple times
       const uniqueVisitors: Record<string, VisitorData> = {};
       
       data.forEach(item => {
@@ -65,28 +62,24 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
       
       const visitors = Object.values(uniqueVisitors);
       
-      // Count devices
       const deviceCounts: Record<string, number> = {};
       visitors.forEach(visitor => {
         const device = visitor.device || 'Unknown';
         deviceCounts[device] = (deviceCounts[device] || 0) + 1;
       });
       
-      // Count browsers
       const browserCounts: Record<string, number> = {};
       visitors.forEach(visitor => {
         const browser = visitor.browser || 'Unknown';
         browserCounts[browser] = (browserCounts[browser] || 0) + 1;
       });
       
-      // Count operating systems
       const osCounts: Record<string, number> = {};
       visitors.forEach(visitor => {
         const os = visitor.os || 'Unknown';
         osCounts[os] = (osCounts[os] || 0) + 1;
       });
       
-      // Convert to arrays and sort
       const totalVisitors = visitors.length;
       
       const devices = Object.entries(deviceCounts).map(([name, count]) => ({
@@ -300,4 +293,3 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
     </Card>
   );
 }
-

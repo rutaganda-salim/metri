@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DateRange } from "react-day-picker";
+import { Globe } from "lucide-react";
 
 interface WorldMapProps {
   trackingId?: string;
@@ -71,6 +72,52 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
     ];
     return colors[index % colors.length];
   };
+  
+  const getCountryFlag = (countryName: string) => {
+    // ISO country codes for common countries
+    const countryCodes: Record<string, string> = {
+      'United States': 'us',
+      'USA': 'us',
+      'United Kingdom': 'gb',
+      'UK': 'gb',
+      'Canada': 'ca',
+      'Australia': 'au',
+      'Germany': 'de',
+      'France': 'fr',
+      'Japan': 'jp',
+      'China': 'cn',
+      'India': 'in',
+      'Brazil': 'br',
+      'Russia': 'ru',
+      'Mexico': 'mx',
+      'Spain': 'es',
+      'Italy': 'it',
+      'South Korea': 'kr',
+      'Netherlands': 'nl',
+      'Sweden': 'se',
+      'Switzerland': 'ch',
+      'Singapore': 'sg',
+      'Nigeria': 'ng',
+      'South Africa': 'za',
+      'New Zealand': 'nz',
+    };
+    
+    const code = countryCodes[countryName] || '';
+    
+    if (code) {
+      return (
+        <div className="w-6 h-4 rounded-sm border border-gray-200 overflow-hidden mr-2">
+          <img 
+            src={`https://flagcdn.com/w40/${code}.png`} 
+            alt={`${countryName} flag`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    }
+    
+    return <Globe className="h-5 w-5 mr-2" />;
+  };
 
   return (
     <Card>
@@ -97,7 +144,10 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
               {data.slice(0, 6).map((country: CountryData, index) => (
                 <div key={index} className="border rounded-md p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="font-medium truncate">{country.name}</div>
+                    <div className="flex items-center font-medium truncate">
+                      {getCountryFlag(country.name)}
+                      <span>{country.name}</span>
+                    </div>
                     <div 
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: getColorForIndex(index) }}
@@ -116,10 +166,7 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
                   {data.slice(6, 15).map((country: CountryData, index) => (
                     <div key={index} className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <div 
-                          className="w-2 h-2 rounded-full mr-2"
-                          style={{ backgroundColor: getColorForIndex(index + 6) }}
-                        />
+                        {getCountryFlag(country.name)}
                         <span className="text-sm">{country.name}</span>
                       </div>
                       <span className="text-sm font-medium">{country.count}</span>
@@ -134,3 +181,4 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
     </Card>
   );
 }
+

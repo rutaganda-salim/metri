@@ -54,14 +54,24 @@ const ScriptPage = () => {
   }, [id]);
 
   const getScriptTag = () => {
-    if (!scriptData || !website) return "";
+    if (!website) return "";
     
+    // Format the script tag with the correct data attributes
     return `<script
   defer
   data-website-id="${website.tracking_id}"
-  data-domain="${website.domain || window.location.hostname}"
-  src="/js/script.js">
+  data-domain="${website.domain || extractDomain(website.site_url)}"
+  src="${window.location.origin}/js/script.js">
 </script>`;
+  };
+
+  const extractDomain = (url) => {
+    try {
+      const parsedUrl = new URL(url);
+      return parsedUrl.hostname;
+    } catch (e) {
+      return window.location.hostname;
+    }
   };
 
   const handleCopy = () => {
@@ -141,6 +151,18 @@ const ScriptPage = () => {
               <li>Return to the analytics dashboard to see your data</li>
             </ol>
           </div>
+          <div className="bg-muted/50 p-4 rounded-md">
+            <h4 className="font-medium mb-2">Tracking Features:</h4>
+            <ul className="list-disc list-inside space-y-2 text-sm">
+              <li>Page views and unique visitors</li>
+              <li>Traffic sources (Google, Facebook, Twitter, etc.)</li>
+              <li>Device types (Mobile, Desktop, Tablet)</li>
+              <li>Browsers (Chrome, Firefox, Safari, etc.)</li>
+              <li>Operating systems (Windows, macOS, Android, iOS, Linux)</li>
+              <li>Geographic location of visitors</li>
+              <li>Referral sources</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
     </DashboardLayout>
@@ -148,3 +170,4 @@ const ScriptPage = () => {
 };
 
 export default ScriptPage;
+

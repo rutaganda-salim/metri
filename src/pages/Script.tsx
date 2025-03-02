@@ -151,18 +151,6 @@ const ScriptPage = () => {
               <li>Return to the analytics dashboard to see your data</li>
             </ol>
           </div>
-          <div className="bg-muted/50 p-4 rounded-md">
-            <h4 className="font-medium mb-2">Tracking Features:</h4>
-            <ul className="list-disc list-inside space-y-2 text-sm">
-              <li>Page views and unique visitors</li>
-              <li>Traffic sources (Google, Facebook, Twitter, etc.)</li>
-              <li>Device types (Mobile, Desktop, Tablet)</li>
-              <li>Browsers (Chrome, Firefox, Safari, etc.)</li>
-              <li>Operating systems (Windows, macOS, Android, iOS, Linux)</li>
-              <li>Geographic location of visitors</li>
-              <li>Referral sources</li>
-            </ul>
-          </div>
         </CardContent>
       </Card>
     </DashboardLayout>

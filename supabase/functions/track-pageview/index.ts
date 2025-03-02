@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 import { UAParser } from "https://esm.sh/ua-parser-js@1.0.35";
@@ -21,6 +20,13 @@ interface PageViewData {
   screen_height?: number;
   language?: string;
   title?: string;
+  path?: string;
+  domain?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
 }
 
 interface GeoIPResponse {
@@ -39,10 +45,10 @@ async function getGeoData(ip: string): Promise<GeoIPResponse> {
       console.error("Failed to fetch location data:", response.statusText);
       return {};
     }
-    
+
     const data = await response.json();
     console.log("GeoIP data:", data);
-    
+
     // Parse lat,long from loc field
     let latitude, longitude;
     if (data.loc) {
@@ -88,12 +94,12 @@ serve(async (req) => {
     // Parse user agent for browser, OS, and device data
     const userAgent = req.headers.get("user-agent") || "";
     console.log("User Agent:", userAgent);
-    
+
     const parser = new UAParser(userAgent);
     const browserInfo = parser.getBrowser();
     const osInfo = parser.getOS();
     const deviceInfo = parser.getDevice();
-    
+
     console.log("Browser info:", browserInfo);
     console.log("OS info:", osInfo);
     console.log("Device info:", deviceInfo);
@@ -113,6 +119,8 @@ serve(async (req) => {
       tracking_id: data.tracking_id,
       visitor_id: data.visitor_id,
       page_url: data.url,
+      path: data.path || null,
+      domain: data.domain || null,
       referrer: data.referrer || null,
       browser: browserInfo.name || null,
       browser_version: browserInfo.version || null,
@@ -131,6 +139,11 @@ serve(async (req) => {
       latitude: geoData.latitude || null,
       longitude: geoData.longitude || null,
       ip_address: clientIP,
+      utm_source: data.utm_source || null,
+      utm_medium: data.utm_medium || null,
+      utm_campaign: data.utm_campaign || null,
+      utm_content: data.utm_content || null,
+      utm_term: data.utm_term || null,
     });
 
     if (pageViewError) {

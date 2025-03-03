@@ -79,22 +79,34 @@ serve(async (req) => {
   }
 
   try {
-    // Get the client's IP address
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
     console.log("Client IP:", clientIP);
+
+    // Log the raw request body for debugging
+    const rawBody = await req.text();
+    console.log("Raw request body:", rawBody);
+
+    // Parse the JSON
+    const data: PageViewData = JSON.parse(rawBody);
+    console.log("Parsed data:", data);
+
+    // Validate required fields
+    if (!data.tracking_id || !data.visitor_id) {
+      return new Response(
+        JSON.stringify({ error: "Missing required fields: tracking_id and visitor_id are required" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
 
     // Get geolocation data
     const geoData = await getGeoData(clientIP);
     console.log("Geolocation data:", geoData);
 
-    // Parse the request data
-    const data: PageViewData = await req.json();
-    console.log("Request data:", data);
-
-    // Parse user agent for browser, OS, and device data
+    // Parse user agent
     const userAgent = req.headers.get("user-agent") || "";
-    console.log("User Agent:", userAgent);
-
     const parser = new UAParser(userAgent);
     const browserInfo = parser.getBrowser();
     const osInfo = parser.getOS();
@@ -114,8 +126,8 @@ serve(async (req) => {
       deviceType = deviceInfo.type;
     }
 
-    // Insert the page view into the database
-    const { error: pageViewError } = await supabase.from("page_views").insert({
+    // Log the final data being inserted
+    const insertData = {
       tracking_id: data.tracking_id,
       visitor_id: data.visitor_id,
       page_url: data.url,
@@ -144,12 +156,20 @@ serve(async (req) => {
       utm_campaign: data.utm_campaign || null,
       utm_content: data.utm_content || null,
       utm_term: data.utm_term || null,
-    });
+    };
+    console.log("Data being inserted:", insertData);
+
+    const { error: pageViewError } = await supabase
+      .from("page_views")
+      .insert([insertData]);
 
     if (pageViewError) {
-      console.error("Error storing page view:", pageViewError);
+      console.error("Detailed insert error:", pageViewError);
       return new Response(
-        JSON.stringify({ error: "Failed to store page view" }),
+        JSON.stringify({
+          error: "Failed to store page view",
+          details: pageViewError
+        }),
         {
           status: 500,
           headers: { "Content-Type": "application/json", ...corsHeaders },

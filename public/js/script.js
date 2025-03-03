@@ -65,8 +65,7 @@
         utm_medium: utmMedium,
         utm_campaign: utmCampaign,
         utm_content: utmContent,
-        utm_term: utmTerm,
-        userAgent: navigator.userAgent
+        utm_term: utmTerm
       };
 
       // Retry logic

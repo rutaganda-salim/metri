@@ -26,8 +26,8 @@
     return visitorId;
   };
 
-  // Track a page view
-  const trackPageView = async () => {
+  // Track a page view with retry logic
+  const trackPageView = async (retryCount = 3, delay = 1000) => {
     try {
       const visitorId = getVisitorId();
       const referrer = document.referrer;
@@ -50,32 +50,61 @@
       const utmContent = urlParams.get('utm_content');
       const utmTerm = urlParams.get('utm_term');
 
-      // Send tracking data to API
-      await fetch('https://mgsubqvamygnunlzttsr.supabase.co/functions/v1/track-pageview', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tracking_id: websiteId,
-          url: url,
-          path: path,
-          referrer: referrer,
-          visitor_id: visitorId,
-          domain: domain || window.location.hostname,
-          screen_width: screenWidth,
-          screen_height: screenHeight,
-          language: language,
-          title: title,
-          utm_source: utmSource,
-          utm_medium: utmMedium,
-          utm_campaign: utmCampaign,
-          utm_content: utmContent,
-          utm_term: utmTerm
-        }),
-      });
+      const payload = {
+        trackingId: websiteId,
+        url: url,
+        path: path,
+        referrer: referrer,
+        visitorId: visitorId,
+        domain: domain || window.location.hostname,
+        screenResolution: `${screenWidth}x${screenHeight}`,
+        language: language,
+        title: title,
+        utmSource: utmSource,
+        utmMedium: utmMedium,
+        utmCampaign: utmCampaign,
+        utmContent: utmContent,
+        utmTerm: utmTerm,
+        userAgent: navigator.userAgent
+      };
+
+      // Retry logic
+      for (let i = 0; i < retryCount; i++) {
+        try {
+          const response = await fetch('https://mgsubqvamygnunlzttsr.supabase.co/functions/v1/track-pageview', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            mode: 'cors',
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            return; // Success - exit the retry loop
+          }
+
+          const errorText = await response.text();
+          console.warn(`Pulse Analytics: Attempt ${i + 1}/${retryCount} failed with status ${response.status}: ${errorText}`);
+
+          // If this wasn't the last attempt, wait before retrying
+          if (i < retryCount - 1) {
+            await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i))); // Exponential backoff
+          }
+        } catch (networkError) {
+          console.warn(`Pulse Analytics: Network error on attempt ${i + 1}/${retryCount}:`, networkError);
+
+          // If this wasn't the last attempt, wait before retrying
+          if (i < retryCount - 1) {
+            await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i))); // Exponential backoff
+          }
+        }
+      }
+
+      throw new Error(`Failed to track page view after ${retryCount} attempts`);
     } catch (e) {
-      console.error('Pulse Analytics: Error tracking page view', e);
+      console.error('Pulse Analytics: Error tracking page view:', e.message);
     }
   };
 

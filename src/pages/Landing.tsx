@@ -18,7 +18,7 @@ const Landing = () => {
         <div className="container flex items-center justify-between h-16 px-4 md:px-6">
           <Link to="/" className="text-2xl font-bold flex items-center space-x-2">
             <LineChart className="h-6 w-6" />
-            <span>Analytics</span>
+            <span>Metri</span>
           </Link>
           <div className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -40,65 +40,62 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="py-20 px-4">
+      {/* Hero Section - Redesigned without an image */}
+      <section className="py-20 px-4 bg-gradient-to-b from-background to-secondary/20">
         <div className="container mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 space-y-8">
-              <div className="space-y-4">
-                <div className="inline-block rounded-full px-3 py-1 text-sm bg-secondary text-foreground">
-                  <span className="flex items-center">
-                    <span className="mr-2 h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                    Analytics for everyone
-                  </span>
-                </div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight vercel-gradient">
-                  Analytics that <br /> 
-                  <span className="text-gradient">just works</span>
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-xl">
-                  Simple, fast analytics for your websites and applications. No cookies required, fully GDPR compliant.
-                </p>
+          <div className="text-center max-w-4xl mx-auto space-y-8">
+            <div className="inline-block rounded-full px-3 py-1 text-sm bg-secondary text-foreground">
+              <span className="flex items-center justify-center">
+                <span className="mr-2 h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+                Analytics for everyone
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight vercel-gradient">
+              <span className="text-gradient">Metri</span> Analytics that <br /> 
+              just works
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Simple, fast analytics for your websites and applications. No cookies required, fully GDPR compliant.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/auth">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <a href="#how-it-works">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  Learn more
+                </Button>
+              </a>
+            </div>
+            <div className="flex items-center space-x-4 text-sm text-muted-foreground justify-center">
+              <div className="flex items-center">
+                <Check className="mr-1 h-4 w-4 text-primary" />
+                <span>Privacy-focused</span>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/auth">
-                  <Button size="lg" className="w-full sm:w-auto">
-                    Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <a href="#how-it-works">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                    Learn more
-                  </Button>
-                </a>
+              <div className="flex items-center">
+                <Check className="mr-1 h-4 w-4 text-primary" />
+                <span>GDPR Compliant</span>
               </div>
-              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                <div className="flex items-center">
-                  <Check className="mr-1 h-4 w-4 text-primary" />
-                  <span>Privacy-focused</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="mr-1 h-4 w-4 text-primary" />
-                  <span>GDPR Compliant</span>
-                </div>
-                <div className="flex items-center">
-                  <Check className="mr-1 h-4 w-4 text-primary" />
-                  <span>No cookies</span>
-                </div>
+              <div className="flex items-center">
+                <Check className="mr-1 h-4 w-4 text-primary" />
+                <span>No cookies</span>
               </div>
             </div>
-            <div className="flex-1">
-              <div className="relative">
-                <div className="absolute -top-10 -left-10 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
-                <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
-                <div className="bg-secondary/30 backdrop-blur-md border border-border p-2 rounded-xl shadow-xl">
-                  <img
-                    src="/placeholder.svg"
-                    alt="Analytics Dashboard"
-                    className="rounded-lg w-full"
-                  />
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 max-w-3xl mx-auto">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-background/60 rounded-lg p-4 border border-border shadow-sm flex items-center justify-center">
+                  <div className="flex flex-col items-center">
+                    <div className="text-3xl font-bold text-primary">{(i + 1) * 10}k+</div>
+                    <div className="text-muted-foreground text-sm">
+                      {i === 0 ? 'Users' : i === 1 ? 'Websites' : i === 2 ? 'Companies' : 'Countries'}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
@@ -379,7 +376,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials Section - Updated with avatars */}
       <section id="testimonials" className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -403,8 +400,12 @@ const Landing = () => {
                 "This analytics platform is exactly what I needed. Simple, privacy-focused, and gives me all the data I care about."
               </blockquote>
               <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Users className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                  <img 
+                    src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
+                    alt="Sarah Chen"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
                   <p className="font-semibold">Sarah Chen</p>
@@ -426,8 +427,12 @@ const Landing = () => {
                 "I switched from Google Analytics and couldn't be happier. No more cookie banners and the data is more accurate."
               </blockquote>
               <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Users className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                  <img 
+                    src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952" 
+                    alt="David Johnson"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
                   <p className="font-semibold">David Johnson</p>
@@ -449,8 +454,12 @@ const Landing = () => {
                 "The simplicity of the dashboard is refreshing. I can find what I need without getting lost in a sea of metrics I don't care about."
               </blockquote>
               <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Users className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                  <img 
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" 
+                    alt="Maria Rodriguez"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
                   <p className="font-semibold">Maria Rodriguez</p>
@@ -472,8 +481,12 @@ const Landing = () => {
                 "Setting up took less than 5 minutes. The integration was smooth and the data started flowing immediately."
               </blockquote>
               <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Users className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                  <img 
+                    src="https://images.unsplash.com/photo-1566492031773-4f4e44671857" 
+                    alt="James Wilson"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
                   <p className="font-semibold">James Wilson</p>
@@ -495,8 +508,12 @@ const Landing = () => {
                 "As a developer, I appreciate how lightweight the tracking script is. It doesn't slow down my site at all."
               </blockquote>
               <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Users className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                  <img 
+                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36" 
+                    alt="Alex Thompson"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
                   <p className="font-semibold">Alex Thompson</p>
@@ -518,8 +535,12 @@ const Landing = () => {
                 "The customer support is exceptional. They helped me set up custom tracking for my SPA and were responsive throughout."
               </blockquote>
               <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                  <Users className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+                  <img 
+                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956" 
+                    alt="Emma Davis"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
                 <div>
                   <p className="font-semibold">Emma Davis</p>
@@ -620,7 +641,7 @@ const Landing = () => {
             <div>
               <div className="text-2xl font-bold flex items-center space-x-2 mb-4">
                 <LineChart className="h-6 w-6" />
-                <span>Analytics</span>
+                <span>Metri</span>
               </div>
               <p className="text-muted-foreground">
                 Simple, privacy-focused analytics for your websites and applications.
@@ -659,7 +680,7 @@ const Landing = () => {
           </div>
 
           <div className="mt-12 pt-8 border-t border-border text-center text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Analytics. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Metri. All rights reserved.</p>
           </div>
         </div>
       </footer>

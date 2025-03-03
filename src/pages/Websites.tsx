@@ -46,7 +46,7 @@ const WebsitesPage = () => {
     fetchWebsites();
   }, []);
 
-  const handleAddWebsite = async (e: React.FormEvent) => {
+  const handleAddWebsite = async (e) => {
     e.preventDefault();
     
     if (!siteName.trim() || !siteUrl.trim()) {
@@ -100,18 +100,22 @@ const WebsitesPage = () => {
     }
   };
 
-  const handleDeleteWebsite = async (id) => {
+  const handleDeleteWebsite = async () => {
+    if (!deleteWebsiteId) return;
+    
     try {
       setIsLoading(true);
       const { error } = await supabase
         .from("users_tracking")
         .delete()
-        .eq("id", id);
+        .eq("id", deleteWebsiteId);
 
       if (error) throw error;
       
+      setWebsites(websites.filter(website => website.id !== deleteWebsiteId));
       setDeleteDialogOpen(false);
-      fetchWebsites();
+      setDeleteWebsiteId(null);
+      
       toast({
         title: "Website deleted successfully",
       });
@@ -190,7 +194,7 @@ const WebsitesPage = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteWebsiteId && handleDeleteWebsite(deleteWebsiteId)}
+              onClick={handleDeleteWebsite}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete

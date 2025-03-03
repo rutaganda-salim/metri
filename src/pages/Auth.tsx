@@ -169,10 +169,12 @@ const AuthPage = () => {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid items-center justify-center w-full grid-cols-2 p-1 mx-6 mt-6">
-                <TabsTrigger value="login" className="rounded-md">Login</TabsTrigger>
-                <TabsTrigger value="register" className="rounded-md">Register</TabsTrigger>
-              </TabsList>
+              <div className="flex justify-center">
+                <TabsList className="grid w-[80%] items-center grid-cols-2 p-1 mx-auto mt-6 mb-2">
+                  <TabsTrigger value="login" className="rounded-md">Login</TabsTrigger>
+                  <TabsTrigger value="register" className="rounded-md">Register</TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="login">
                 <CardContent className="space-y-5 pt-6">

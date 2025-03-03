@@ -104,3 +104,11 @@
 .auth-input {
   @apply pl-10 bg-input/10;
 }
+
+.auth-tabs {
+  @apply flex justify-center w-full;
+}
+
+.auth-tabs-list {
+  @apply w-4/5 mx-auto;
+}

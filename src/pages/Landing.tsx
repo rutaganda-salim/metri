@@ -282,8 +282,16 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            <Card className="vercel-card border-primary">
-              <CardContent className="p-6 flex flex-col h-full">
+            <Card className="vercel-card relative overflow-hidden">
+              <div className="absolute inset-0 bg-secondary/70 backdrop-blur-sm flex items-center justify-center z-10">
+                <div className="text-center">
+                  <div className="text-xl font-bold mb-2">Pro Plan</div>
+                  <div className="bg-primary text-primary-foreground px-4 py-2 rounded-full inline-block">
+                    Coming Soon
+                  </div>
+                </div>
+              </div>
+              <CardContent className="p-6 flex flex-col h-full opacity-50">
                 <div className="absolute -top-3 right-4 rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground">
                   Most Popular
                 </div>
@@ -319,16 +327,22 @@ const Landing = () => {
                     <span>Custom dashboards</span>
                   </li>
                 </ul>
-                <Link to="/auth" className="mt-auto">
-                  <Button className="w-full">
-                    Get Started
-                  </Button>
-                </Link>
+                <Button className="w-full mt-auto" disabled>
+                  Get Started
+                </Button>
               </CardContent>
             </Card>
 
-            <Card className="vercel-card">
-              <CardContent className="p-6 flex flex-col h-full">
+            <Card className="vercel-card relative overflow-hidden">
+              <div className="absolute inset-0 bg-secondary/70 backdrop-blur-sm flex items-center justify-center z-10">
+                <div className="text-center">
+                  <div className="text-xl font-bold mb-2">Enterprise Plan</div>
+                  <div className="bg-primary text-primary-foreground px-4 py-2 rounded-full inline-block">
+                    Coming Soon
+                  </div>
+                </div>
+              </div>
+              <CardContent className="p-6 flex flex-col h-full opacity-50">
                 <div className="mb-6">
                   <h3 className="text-xl font-bold">Enterprise</h3>
                   <div className="mt-4 mb-2">
@@ -365,18 +379,16 @@ const Landing = () => {
                     <span>Priority support</span>
                   </li>
                 </ul>
-                <Link to="/auth" className="mt-auto">
-                  <Button variant="outline" className="w-full">
-                    Contact Sales
-                  </Button>
-                </Link>
+                <Button variant="outline" className="w-full mt-auto" disabled>
+                  Contact Sales
+                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section - Updated with avatars */}
+      {/* Testimonials Section - Updated to use cards */}
       <section id="testimonials" className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -388,166 +400,178 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Testimonial 1 */}
-            <div className="testimonial-card group">
-              <div className="mb-4">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
-                  ))}
+            <Card className="hover:border-primary/50 transition-all duration-300">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="mb-4">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <blockquote className="text-lg mb-6 flex-1">
-                "This analytics platform is exactly what I needed. Simple, privacy-focused, and gives me all the data I care about."
-              </blockquote>
-              <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
-                    alt="Sarah Chen"
-                    className="h-full w-full object-cover"
-                  />
+                <blockquote className="text-lg mb-6 flex-1">
+                  "This analytics platform is exactly what I needed. Simple, privacy-focused, and gives me all the data I care about."
+                </blockquote>
+                <div className="flex items-center mt-auto border-t pt-4">
+                  <div className="h-12 w-12 rounded-full overflow-hidden mr-3 border border-border">
+                    <img 
+                      src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158" 
+                      alt="Sarah Chen"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Sarah Chen</p>
+                    <p className="text-sm text-muted-foreground">Frontend Developer</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">Sarah Chen</p>
-                  <p className="text-sm text-muted-foreground">Frontend Developer</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Testimonial 2 */}
-            <div className="testimonial-card group">
-              <div className="mb-4">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
-                  ))}
+            <Card className="hover:border-primary/50 transition-all duration-300">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="mb-4">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <blockquote className="text-lg mb-6 flex-1">
-                "I switched from Google Analytics and couldn't be happier. No more cookie banners and the data is more accurate."
-              </blockquote>
-              <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952" 
-                    alt="David Johnson"
-                    className="h-full w-full object-cover"
-                  />
+                <blockquote className="text-lg mb-6 flex-1">
+                  "I switched from Google Analytics and couldn't be happier. No more cookie banners and the data is more accurate."
+                </blockquote>
+                <div className="flex items-center mt-auto border-t pt-4">
+                  <div className="h-12 w-12 rounded-full overflow-hidden mr-3 border border-border">
+                    <img 
+                      src="https://images.unsplash.com/photo-1581092795360-fd1ca04f0952" 
+                      alt="David Johnson"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">David Johnson</p>
+                    <p className="text-sm text-muted-foreground">Agency Owner</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">David Johnson</p>
-                  <p className="text-sm text-muted-foreground">Agency Owner</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Testimonial 3 */}
-            <div className="testimonial-card group">
-              <div className="mb-4">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
-                  ))}
+            <Card className="hover:border-primary/50 transition-all duration-300">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="mb-4">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <blockquote className="text-lg mb-6 flex-1">
-                "The simplicity of the dashboard is refreshing. I can find what I need without getting lost in a sea of metrics I don't care about."
-              </blockquote>
-              <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" 
-                    alt="Maria Rodriguez"
-                    className="h-full w-full object-cover"
-                  />
+                <blockquote className="text-lg mb-6 flex-1">
+                  "The simplicity of the dashboard is refreshing. I can find what I need without getting lost in a sea of metrics I don't care about."
+                </blockquote>
+                <div className="flex items-center mt-auto border-t pt-4">
+                  <div className="h-12 w-12 rounded-full overflow-hidden mr-3 border border-border">
+                    <img 
+                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330" 
+                      alt="Maria Rodriguez"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Maria Rodriguez</p>
+                    <p className="text-sm text-muted-foreground">Marketing Director</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">Maria Rodriguez</p>
-                  <p className="text-sm text-muted-foreground">Marketing Director</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Testimonial 4 */}
-            <div className="testimonial-card group">
-              <div className="mb-4">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
-                  ))}
+            <Card className="hover:border-primary/50 transition-all duration-300">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="mb-4">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <blockquote className="text-lg mb-6 flex-1">
-                "Setting up took less than 5 minutes. The integration was smooth and the data started flowing immediately."
-              </blockquote>
-              <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1566492031773-4f4e44671857" 
-                    alt="James Wilson"
-                    className="h-full w-full object-cover"
-                  />
+                <blockquote className="text-lg mb-6 flex-1">
+                  "Setting up took less than 5 minutes. The integration was smooth and the data started flowing immediately."
+                </blockquote>
+                <div className="flex items-center mt-auto border-t pt-4">
+                  <div className="h-12 w-12 rounded-full overflow-hidden mr-3 border border-border">
+                    <img 
+                      src="https://images.unsplash.com/photo-1566492031773-4f4e44671857" 
+                      alt="James Wilson"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">James Wilson</p>
+                    <p className="text-sm text-muted-foreground">CTO</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">James Wilson</p>
-                  <p className="text-sm text-muted-foreground">CTO</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Testimonial 5 */}
-            <div className="testimonial-card group">
-              <div className="mb-4">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
-                  ))}
+            <Card className="hover:border-primary/50 transition-all duration-300">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="mb-4">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <blockquote className="text-lg mb-6 flex-1">
-                "As a developer, I appreciate how lightweight the tracking script is. It doesn't slow down my site at all."
-              </blockquote>
-              <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36" 
-                    alt="Alex Thompson"
-                    className="h-full w-full object-cover"
-                  />
+                <blockquote className="text-lg mb-6 flex-1">
+                  "As a developer, I appreciate how lightweight the tracking script is. It doesn't slow down my site at all."
+                </blockquote>
+                <div className="flex items-center mt-auto border-t pt-4">
+                  <div className="h-12 w-12 rounded-full overflow-hidden mr-3 border border-border">
+                    <img 
+                      src="https://images.unsplash.com/photo-1599566150163-29194dcaad36" 
+                      alt="Alex Thompson"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Alex Thompson</p>
+                    <p className="text-sm text-muted-foreground">Software Engineer</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">Alex Thompson</p>
-                  <p className="text-sm text-muted-foreground">Software Engineer</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Testimonial 6 */}
-            <div className="testimonial-card group">
-              <div className="mb-4">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
-                  ))}
+            <Card className="hover:border-primary/50 transition-all duration-300">
+              <CardContent className="p-6 flex flex-col h-full">
+                <div className="mb-4">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-primary" fill="currentColor" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <blockquote className="text-lg mb-6 flex-1">
-                "The customer support is exceptional. They helped me set up custom tracking for my SPA and were responsive throughout."
-              </blockquote>
-              <div className="flex items-center mt-auto">
-                <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956" 
-                    alt="Emma Davis"
-                    className="h-full w-full object-cover"
-                  />
+                <blockquote className="text-lg mb-6 flex-1">
+                  "The customer support is exceptional. They helped me set up custom tracking for my SPA and were responsive throughout."
+                </blockquote>
+                <div className="flex items-center mt-auto border-t pt-4">
+                  <div className="h-12 w-12 rounded-full overflow-hidden mr-3 border border-border">
+                    <img 
+                      src="https://images.unsplash.com/photo-1580489944761-15a19d654956" 
+                      alt="Emma Davis"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Emma Davis</p>
+                    <p className="text-sm text-muted-foreground">Product Manager</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">Emma Davis</p>
-                  <p className="text-sm text-muted-foreground">Product Manager</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

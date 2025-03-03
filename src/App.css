@@ -42,13 +42,14 @@
   color: #888;
 }
 
-.testimonial-card {
+/* Removing the testimonial-card class as we're now using shadcn Card component */
+/* .testimonial-card {
   @apply bg-secondary/50 backdrop-blur-sm rounded-xl shadow-sm border border-border p-6 transition-all duration-300 flex flex-col;
 }
 
 .testimonial-card:hover {
   @apply border-foreground/20 bg-secondary;
-}
+} */
 
 .faq-card {
   @apply bg-background rounded-xl border border-border shadow-sm overflow-hidden transition-all duration-300;
@@ -64,4 +65,14 @@
 
 .faq-answer {
   @apply px-6 pb-4 text-muted-foreground;
+}
+
+/* Adding styles for the card container to ensure they have matching heights */
+.vercel-card {
+  @apply border border-border bg-background/80 backdrop-blur-sm transition-all duration-300 hover:border-primary/30;
+  height: 100%;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500;
 }

@@ -42,15 +42,6 @@
   color: #888;
 }
 
-/* Removing the testimonial-card class as we're now using shadcn Card component */
-/* .testimonial-card {
-  @apply bg-secondary/50 backdrop-blur-sm rounded-xl shadow-sm border border-border p-6 transition-all duration-300 flex flex-col;
-}
-
-.testimonial-card:hover {
-  @apply border-foreground/20 bg-secondary;
-} */
-
 .faq-card {
   @apply bg-background rounded-xl border border-border shadow-sm overflow-hidden transition-all duration-300;
 }
@@ -75,4 +66,41 @@
 
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500;
+}
+
+/* Auth page specific styles */
+.auth-container {
+  @apply min-h-screen flex items-center justify-center bg-muted/30;
+}
+
+.auth-card {
+  @apply border-border bg-card shadow-lg rounded-xl overflow-hidden;
+  max-width: 420px;
+  width: 100%;
+}
+
+.auth-header {
+  @apply p-6 text-center border-b;
+}
+
+.auth-logo {
+  @apply bg-black text-white rounded-full p-2 inline-flex items-center justify-center;
+  width: 40px;
+  height: 40px;
+}
+
+.auth-button {
+  @apply w-full bg-black hover:bg-black/90 text-white flex items-center justify-center gap-2;
+}
+
+.auth-social-button {
+  @apply w-full border border-border hover:bg-muted/50 flex items-center justify-center gap-2;
+}
+
+.auth-input-icon {
+  @apply absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground;
+}
+
+.auth-input {
+  @apply pl-10 bg-input/10;
 }

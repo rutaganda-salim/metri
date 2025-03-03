@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import {
@@ -14,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Separator } from "@/components/ui/separator";
-import { Mail, ArrowLeft, Zap } from "lucide-react";
+import { ArrowLeft, Mail, LockKeyhole, UserRound, Github } from "lucide-react";
 
 const AuthPage = () => {
   const [searchParams] = useSearchParams();
@@ -123,12 +124,14 @@ const AuthPage = () => {
           Back to home
         </Link>
 
-        <Card className="border-border bg-card shadow-lg">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex items-center justify-center mb-2">
-              <Zap className="h-8 w-8 text-sidebar-primary mr-2" />
+        <Card className="border-border bg-card shadow-lg overflow-hidden">
+          <CardHeader className="space-y-1 text-center pb-6 border-b">
+            <div className="flex items-center justify-center mb-3">
+              <div className="bg-black rounded-full p-2 mr-2">
+                <UserRound className="h-6 w-6 text-white" />
+              </div>
               <CardTitle className="text-2xl font-bold">
-                Pulse Analytics
+                Metri
               </CardTitle>
             </div>
             <CardDescription className="text-muted-foreground">
@@ -137,7 +140,7 @@ const AuthPage = () => {
           </CardHeader>
 
           {isMagicLinkSent ? (
-            <CardContent className="space-y-4 pt-4">
+            <CardContent className="space-y-6 pt-6">
               <div className="text-center space-y-4">
                 <div className="mx-auto bg-sidebar-accent/50 w-16 h-16 rounded-full flex items-center justify-center">
                   <Mail className="h-8 w-8 text-sidebar-primary" />
@@ -166,28 +169,22 @@ const AuthPage = () => {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid items-center justify-center w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsList className="grid items-center justify-center w-full grid-cols-2 p-1 mx-6 mt-6">
+                <TabsTrigger value="login" className="rounded-md">Login</TabsTrigger>
+                <TabsTrigger value="register" className="rounded-md">Register</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
+                <CardContent className="space-y-5 pt-6">
+                  <div className="space-y-3">
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full flex items-center justify-center"
+                      className="w-full flex items-center justify-center gap-2 border-gray-300"
                       onClick={handleGithubSignIn}
                       disabled={isLoading}
                     >
-                      <svg
-                        className="mr-2 h-4 w-4"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                      </svg>
+                      <Github className="h-4 w-4" />
                       Sign in with GitHub
                     </Button>
                   </div>
@@ -203,24 +200,28 @@ const AuthPage = () => {
                     </div>
                   </div>
 
-                  <form onSubmit={handleMagicLinkSignIn}>
+                  <form onSubmit={handleMagicLinkSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Input
-                        id="email"
-                        placeholder="Email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="bg-input/10"
-                      />
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          placeholder="Email address"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="bg-input/10 pl-10"
+                        />
+                      </div>
                     </div>
                     <Button
                       type="submit"
-                      className="w-full mt-4 bg-black hover:bg-black/90 text-white"
+                      className="w-full bg-black hover:bg-black/90 text-white"
                       disabled={isLoading}
                     >
                       {isLoading ? "Sending..." : "Send Magic Link"}
+                      <LockKeyhole className="ml-2 h-4 w-4" />
                     </Button>
                   </form>
                 </CardContent>
@@ -228,22 +229,16 @@ const AuthPage = () => {
 
               <TabsContent value="register">
                 <form onSubmit={handleSignUp}>
-                  <CardContent className="space-y-4 pt-4">
-                    <div className="space-y-2">
+                  <CardContent className="space-y-5 pt-6">
+                    <div className="space-y-3">
                       <Button
                         type="button"
                         variant="outline"
-                        className="w-full flex items-center justify-center"
+                        className="w-full flex items-center justify-center gap-2 border-gray-300"
                         onClick={handleGithubSignIn}
                         disabled={isLoading}
                       >
-                        <svg
-                          className="mr-2 h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                        >
-                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
-                        </svg>
+                        <Github className="h-4 w-4" />
                         Sign up with GitHub
                       </Button>
                     </div>
@@ -259,30 +254,34 @@ const AuthPage = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Input
-                        id="fullName"
-                        placeholder="Full Name"
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required
-                        className="bg-input/10"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Input
-                        id="email"
-                        placeholder="Email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="bg-input/10"
-                      />
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="fullName"
+                          placeholder="Full Name"
+                          type="text"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          required
+                          className="bg-input/10 pl-10"
+                        />
+                      </div>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          placeholder="Email address"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          className="bg-input/10 pl-10"
+                        />
+                      </div>
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="pb-6">
                     <Button
                       type="submit"
                       className="w-full bg-black hover:bg-black/90 text-white"
@@ -291,6 +290,7 @@ const AuthPage = () => {
                       {isLoading
                         ? "Creating account..."
                         : "Continue with Magic Link"}
+                      <LockKeyhole className="ml-2 h-4 w-4" />
                     </Button>
                   </CardFooter>
                 </form>

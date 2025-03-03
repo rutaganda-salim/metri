@@ -2,13 +2,15 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 import { UAParser } from "https://esm.sh/ua-parser-js@1.0.35";
 
-const supabaseUrl = Deno.env.get("https://mgsubqvamygnunlzttsr.supabase.co") || "";
-const supabaseKey = Deno.env.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nc3VicXZhbXlnbnVubHp0dHNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NjYxNDEsImV4cCI6MjA1NjI0MjE0MX0.0JIyLTB2v5UT1SeIV2JBUsGbbM0jamKq-uQojfD3o6Y") || "";
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://mgsubqvamygnunlzttsr.supabase.co";
+const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "your_service_role_key";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept',
+  'Access-Control-Max-Age': '86400',
 };
 
 interface PageViewData {
@@ -71,10 +73,11 @@ async function getGeoData(ip: string): Promise<GeoIPResponse> {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight request
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', {
       headers: corsHeaders,
+      status: 200 // Make sure we return 200 for OPTIONS
     });
   }
 
@@ -199,16 +202,22 @@ serve(async (req) => {
       JSON.stringify({ success: true }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders // Include CORS headers in success response
+        },
       }
     );
   } catch (error) {
     console.error("Error processing request:", error);
     return new Response(
-      JSON.stringify({ error: "Internal server error" }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders // Include CORS headers in error response
+        },
       }
     );
   }

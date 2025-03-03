@@ -51,20 +51,21 @@
       const utmTerm = urlParams.get('utm_term');
 
       const payload = {
-        trackingId: websiteId,
+        tracking_id: websiteId,
         url: url,
         path: path,
         referrer: referrer,
-        visitorId: visitorId,
+        visitor_id: visitorId,
         domain: domain || window.location.hostname,
-        screenResolution: `${screenWidth}x${screenHeight}`,
+        screen_width: screenWidth,
+        screen_height: screenHeight,
         language: language,
         title: title,
-        utmSource: utmSource,
-        utmMedium: utmMedium,
-        utmCampaign: utmCampaign,
-        utmContent: utmContent,
-        utmTerm: utmTerm,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        utm_content: utmContent,
+        utm_term: utmTerm,
         userAgent: navigator.userAgent
       };
 

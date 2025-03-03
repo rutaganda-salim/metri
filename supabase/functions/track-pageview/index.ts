@@ -83,23 +83,58 @@ serve(async (req) => {
 
   try {
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
-    console.log("Client IP:", clientIP);
 
-    // Log the raw request body for debugging
-    const rawBody = await req.text();
-    console.log("Raw request body:", rawBody);
+    // Test database connection first
+    const { data: testData, error: testError } = await supabase
+      .from('page_views')
+      .select('id')
+      .limit(1);
 
-    // Parse the JSON
-    const data: PageViewData = JSON.parse(rawBody);
-    console.log("Parsed data:", data);
-
-    // Validate required fields
-    if (!data.tracking_id || !data.visitor_id) {
+    if (testError) {
+      console.error("Database connection test failed:", testError);
       return new Response(
-        JSON.stringify({ error: "Missing required fields: tracking_id and visitor_id are required" }),
+        JSON.stringify({
+          error: "Database connection error",
+          details: testError
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    // Parse and validate request body
+    let data: PageViewData;
+    try {
+      const rawBody = await req.text();
+      console.log("Raw request body:", rawBody);
+      data = JSON.parse(rawBody);
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      return new Response(
+        JSON.stringify({
+          error: "Invalid JSON payload",
+          details: parseError.message
+        }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+
+    // Validate required fields
+    if (!data.tracking_id || !data.visitor_id || !data.url) {
+      return new Response(
+        JSON.stringify({
+          error: "Missing required fields",
+          required: ["tracking_id", "visitor_id", "url"],
+          received: data
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
         }
       );
     }
@@ -162,20 +197,22 @@ serve(async (req) => {
     };
     console.log("Data being inserted:", insertData);
 
+    // Insert with better error handling
     const { error: pageViewError } = await supabase
       .from("page_views")
       .insert([insertData]);
 
     if (pageViewError) {
-      console.error("Detailed insert error:", pageViewError);
+      console.error("Database insert error:", pageViewError);
       return new Response(
         JSON.stringify({
-          error: "Failed to store page view",
-          details: pageViewError
+          error: "Database insert failed",
+          details: pageViewError,
+          data: insertData
         }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json", ...corsHeaders },
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
         }
       );
     }
@@ -209,15 +246,16 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error processing request:", error);
+    console.error("Unhandled error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        error: "Internal server error",
+        message: error.message,
+        stack: error.stack
+      }),
       {
         status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders // Include CORS headers in error response
-        },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       }
     );
   }

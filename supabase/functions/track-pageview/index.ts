@@ -2,8 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 import { UAParser } from "https://esm.sh/ua-parser-js@1.0.35";
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+const supabaseUrl = Deno.env.get("https://mgsubqvamygnunlzttsr.supabase.co") || "";
+const supabaseKey = Deno.env.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nc3VicXZhbXlnbnVubHp0dHNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA2NjYxNDEsImV4cCI6MjA1NjI0MjE0MX0.0JIyLTB2v5UT1SeIV2JBUsGbbM0jamKq-uQojfD3o6Y") || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const corsHeaders = {

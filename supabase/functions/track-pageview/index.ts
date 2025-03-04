@@ -92,6 +92,21 @@ serve(async (req) => {
       deviceType = deviceInfo.type;
     }
 
+    // Get country information from IP address using ipinfo.io
+    let country = null;
+    try {
+      const ipResponse = await fetch(`https://ipinfo.io/${clientIP}/json`);
+      if (ipResponse.ok) {
+        const ipInfo = await ipResponse.json();
+        country = ipInfo.country ? ipInfo.country_name || ipInfo.country : null;
+        console.log("Country detected:", country);
+      } else {
+        console.warn("Failed to get country information:", await ipResponse.text());
+      }
+    } catch (ipError) {
+      console.warn("Error fetching country information:", ipError);
+    }
+
     // Insert data with simplified fields
     const insertData = {
       tracking_id: data.tracking_id,
@@ -102,7 +117,8 @@ serve(async (req) => {
       operating_system: osInfo.name || null,
       device_type: deviceType,
       ip_address: clientIP,
-      user_agent: userAgent
+      user_agent: userAgent,
+      country: country
     };
     
     console.log("Data being inserted:", insertData);

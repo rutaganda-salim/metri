@@ -129,8 +129,7 @@ export const getCountryCode = (countryName: string): string => {
     'nicaragua': 'ni',
     'niger': 'ne',
     'nigeria': 'ng',
-    'north korea': '
-kp',
+    'north korea': 'kp',
     'north macedonia': 'mk',
     'norway': 'no',
     'oman': 'om',

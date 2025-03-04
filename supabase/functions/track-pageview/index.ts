@@ -25,13 +25,11 @@ serve(async (req) => {
 
   try {
     const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
-    console.log("Request received from IP:", clientIP);
 
     // Parse and validate request body
     let data;
     try {
       const rawBody = await req.text();
-      console.log("Raw request body:", rawBody);
       
       if (!rawBody || rawBody.trim() === '') {
         return new Response(
@@ -47,7 +45,6 @@ serve(async (req) => {
       
       data = JSON.parse(rawBody);
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
       return new Response(
         JSON.stringify({
           error: "Invalid JSON payload",
@@ -98,13 +95,12 @@ serve(async (req) => {
       const ipResponse = await fetch(`https://ipinfo.io/${clientIP}/json`);
       if (ipResponse.ok) {
         const ipInfo = await ipResponse.json();
-        country = ipInfo.country ? ipInfo.country_name || ipInfo.country : null;
-        console.log("Country detected:", country);
-      } else {
-        console.warn("Failed to get country information:", await ipResponse.text());
+        // Use country_name if available, otherwise use country code
+        country = ipInfo.country_name || ipInfo.country || null;
       }
     } catch (ipError) {
-      console.warn("Error fetching country information:", ipError);
+      // Just silently log the error and continue - country will be null
+      console.error("Error fetching country information:", ipError);
     }
 
     // Insert data with simplified fields
@@ -120,8 +116,6 @@ serve(async (req) => {
       user_agent: userAgent,
       country: country
     };
-    
-    console.log("Data being inserted:", insertData);
 
     // Insert with better error handling
     const { error: pageViewError } = await supabase
@@ -129,7 +123,6 @@ serve(async (req) => {
       .insert([insertData]);
 
     if (pageViewError) {
-      console.error("Database insert error:", pageViewError);
       return new Response(
         JSON.stringify({
           error: "Database insert failed",
@@ -170,7 +163,6 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Unhandled error:", error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",

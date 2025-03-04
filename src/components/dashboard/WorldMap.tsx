@@ -100,9 +100,45 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
       'Nigeria': 'ng',
       'South Africa': 'za',
       'New Zealand': 'nz',
+      // Add more country mappings
+      'Ireland': 'ie',
+      'Belgium': 'be',
+      'Portugal': 'pt',
+      'Norway': 'no',
+      'Denmark': 'dk',
+      'Finland': 'fi',
+      'Poland': 'pl',
+      'Austria': 'at',
+      'Greece': 'gr',
+      'Turkey': 'tr',
+      'Thailand': 'th',
+      'Indonesia': 'id',
+      'Malaysia': 'my',
+      'Philippines': 'ph',
+      'Vietnam': 'vn',
+      'Argentina': 'ar',
+      'Chile': 'cl',
+      'Colombia': 'co',
+      'Peru': 'pe',
+      'Egypt': 'eg',
+      'Israel': 'il',
+      'United Arab Emirates': 'ae',
+      'Saudi Arabia': 'sa',
+      'Kenya': 'ke',
+      'Ghana': 'gh',
+      'Morocco': 'ma'
     };
     
-    const code = countryCodes[countryName.trim()] || '';
+    // Ensure the country name is trimmed and matched case-insensitively
+    const normalizedName = countryName.trim();
+    const code = countryCodes[normalizedName] || 
+                 Object.keys(countryCodes).find(key => 
+                   key.toLowerCase() === normalizedName.toLowerCase()
+                 ) ? countryCodes[
+                     Object.keys(countryCodes).find(key => 
+                       key.toLowerCase() === normalizedName.toLowerCase()
+                     ) || ''
+                   ] : '';
     
     if (code) {
       return (
@@ -111,6 +147,17 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
             src={`https://flagcdn.com/w40/${code}.png`} 
             alt={`${countryName} flag`}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to globe icon if flag fails to load
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center', 'bg-gray-100');
+              const parent = e.currentTarget.parentElement;
+              if (parent) {
+                const globeIcon = document.createElement('span');
+                globeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+                parent.appendChild(globeIcon);
+              }
+            }}
           />
         </div>
       );

@@ -102,7 +102,7 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
       'New Zealand': 'nz',
     };
     
-    const code = countryCodes[countryName] || '';
+    const code = countryCodes[countryName.trim()] || '';
     
     if (code) {
       return (
@@ -181,4 +181,3 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
     </Card>
   );
 }
-

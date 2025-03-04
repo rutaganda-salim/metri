@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DateRange } from "react-day-picker";
 import { Globe } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface WorldMapProps {
   trackingId?: string;
@@ -14,6 +15,7 @@ interface WorldMapProps {
 interface CountryData {
   name: string;
   count: number;
+  percentage?: number;
 }
 
 export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
@@ -56,8 +58,13 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
       });
       
       // Convert to array and sort
+      const totalVisitors = Object.values(countryCounts).reduce((sum, count) => sum + count, 0);
       const countries = Object.entries(countryCounts)
-        .map(([name, count]) => ({ name, count: count as number }))
+        .map(([name, count]) => ({ 
+          name, 
+          count: count as number,
+          percentage: totalVisitors > 0 ? Math.round((count / totalVisitors) * 100) : 0
+        }))
         .sort((a, b) => b.count - a.count);
       
       return countries;
@@ -74,88 +81,79 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
   };
   
   const getCountryFlag = (countryName: string) => {
-    // ISO country codes for common countries
+    // ISO country codes for common countries (case-insensitive mapping)
     const countryCodes: Record<string, string> = {
-      'United States': 'us',
-      'USA': 'us',
-      'United Kingdom': 'gb',
-      'UK': 'gb',
-      'Canada': 'ca',
-      'Australia': 'au',
-      'Germany': 'de',
-      'France': 'fr',
-      'Japan': 'jp',
-      'China': 'cn',
-      'India': 'in',
-      'Brazil': 'br',
-      'Russia': 'ru',
-      'Mexico': 'mx',
-      'Spain': 'es',
-      'Italy': 'it',
-      'South Korea': 'kr',
-      'Netherlands': 'nl',
-      'Sweden': 'se',
-      'Switzerland': 'ch',
-      'Singapore': 'sg',
-      'Nigeria': 'ng',
-      'South Africa': 'za',
-      'New Zealand': 'nz',
-      // Add more country mappings
-      'Ireland': 'ie',
-      'Belgium': 'be',
-      'Portugal': 'pt',
-      'Norway': 'no',
-      'Denmark': 'dk',
-      'Finland': 'fi',
-      'Poland': 'pl',
-      'Austria': 'at',
-      'Greece': 'gr',
-      'Turkey': 'tr',
-      'Thailand': 'th',
-      'Indonesia': 'id',
-      'Malaysia': 'my',
-      'Philippines': 'ph',
-      'Vietnam': 'vn',
-      'Argentina': 'ar',
-      'Chile': 'cl',
-      'Colombia': 'co',
-      'Peru': 'pe',
-      'Egypt': 'eg',
-      'Israel': 'il',
-      'United Arab Emirates': 'ae',
-      'Saudi Arabia': 'sa',
-      'Kenya': 'ke',
-      'Ghana': 'gh',
-      'Morocco': 'ma'
+      'united states': 'us',
+      'usa': 'us',
+      'united kingdom': 'gb',
+      'uk': 'gb',
+      'canada': 'ca',
+      'australia': 'au',
+      'germany': 'de',
+      'france': 'fr',
+      'japan': 'jp',
+      'china': 'cn',
+      'india': 'in',
+      'brazil': 'br',
+      'russia': 'ru',
+      'mexico': 'mx',
+      'spain': 'es',
+      'italy': 'it',
+      'south korea': 'kr',
+      'netherlands': 'nl',
+      'sweden': 'se',
+      'switzerland': 'ch',
+      'singapore': 'sg',
+      'nigeria': 'ng',
+      'south africa': 'za',
+      'new zealand': 'nz',
+      'ireland': 'ie',
+      'belgium': 'be',
+      'portugal': 'pt',
+      'norway': 'no',
+      'denmark': 'dk',
+      'finland': 'fi',
+      'poland': 'pl',
+      'austria': 'at',
+      'greece': 'gr',
+      'turkey': 'tr',
+      'thailand': 'th',
+      'indonesia': 'id',
+      'malaysia': 'my',
+      'philippines': 'ph',
+      'vietnam': 'vn',
+      'argentina': 'ar',
+      'chile': 'cl',
+      'colombia': 'co',
+      'peru': 'pe',
+      'egypt': 'eg',
+      'israel': 'il',
+      'united arab emirates': 'ae',
+      'saudi arabia': 'sa',
+      'kenya': 'ke',
+      'ghana': 'gh',
+      'morocco': 'ma',
+      'rwanda': 'rw'
     };
     
-    // Ensure the country name is trimmed and matched case-insensitively
-    const normalizedName = countryName.trim();
-    const code = countryCodes[normalizedName] || 
-                 Object.keys(countryCodes).find(key => 
-                   key.toLowerCase() === normalizedName.toLowerCase()
-                 ) ? countryCodes[
-                     Object.keys(countryCodes).find(key => 
-                       key.toLowerCase() === normalizedName.toLowerCase()
-                     ) || ''
-                   ] : '';
+    // Normalize country name for lookup (lowercase and trim)
+    const normalizedName = countryName.trim().toLowerCase();
+    const code = countryCodes[normalizedName] || '';
     
     if (code) {
       return (
-        <div className="w-6 h-4 rounded-sm border border-gray-200 overflow-hidden mr-2">
+        <div className="inline-flex w-6 h-4 rounded overflow-hidden mr-2 border border-gray-200">
           <img 
             src={`https://flagcdn.com/w40/${code}.png`} 
             alt={`${countryName} flag`}
             className="w-full h-full object-cover"
             onError={(e) => {
               // Fallback to globe icon if flag fails to load
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center', 'bg-gray-100');
-              const parent = e.currentTarget.parentElement;
+              const target = e.currentTarget as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
               if (parent) {
-                const globeIcon = document.createElement('span');
-                globeIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
-                parent.appendChild(globeIcon);
+                parent.innerHTML = `<div class="flex items-center justify-center w-full h-full bg-gray-100"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>`;
               }
             }}
           />
@@ -163,68 +161,141 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
       );
     }
     
-    return <Globe className="h-5 w-5 mr-2" />;
+    return <Globe className="h-4 w-4 mr-2 text-gray-500" />;
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Visitors by Country</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex justify-between items-center">
-                <div className="h-4 w-32 bg-muted rounded"></div>
-                <div className="h-4 w-12 bg-muted rounded"></div>
-              </div>
-            ))}
-          </div>
-        ) : !data || data.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No country data available
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {data.slice(0, 6).map((country: CountryData, index) => (
-                <div key={index} className="border rounded-md p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center font-medium truncate">
-                      {getCountryFlag(country.name)}
-                      <span>{country.name}</span>
-                    </div>
-                    <div 
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: getColorForIndex(index) }}
-                    />
-                  </div>
-                  <div className="text-2xl font-bold">{country.count}</div>
-                  <div className="text-xs text-muted-foreground">visitors</div>
+    <div className="grid grid-cols-2 gap-6 mb-8">
+      <div className="bg-white border rounded-md">
+        <div className="border-b p-4">
+          <h3 className="font-medium">Countries</h3>
+        </div>
+        <div className="p-4">
+          {isLoading ? (
+            <div className="animate-pulse space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex justify-between items-center">
+                  <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                  <div className="h-4 w-12 bg-gray-200 rounded"></div>
                 </div>
               ))}
             </div>
+          ) : !data || data.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No country data available
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {data.slice(0, 5).map((country: CountryData, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    {getCountryFlag(country.name)}
+                    <span className="text-sm">{country.name}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">{country.percentage}%</span>
+                    <span className="text-xs text-gray-500">{country.count}</span>
+                  </div>
+                </div>
+              ))}
+              
+              {data.length > 5 && (
+                <div className="pt-2 mt-2 border-t">
+                  <button className="text-xs text-blue-600 hover:underline">
+                    View all ({data.length})
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <div className="bg-white border rounded-md">
+        <div className="border-b p-4">
+          <h3 className="font-medium">Devices</h3>
+        </div>
+        <div className="p-4">
+          <Tabs defaultValue="devices" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
+              <TabsTrigger value="devices" className="text-xs">Devices</TabsTrigger>
+              <TabsTrigger value="browsers" className="text-xs">Browsers</TabsTrigger>
+              <TabsTrigger value="os" className="text-xs">OS</TabsTrigger>
+            </TabsList>
             
-            {data.length > 6 && (
-              <div>
-                <h4 className="text-sm font-medium mb-2">Other Countries</h4>
-                <div className="space-y-2">
-                  {data.slice(6, 15).map((country: CountryData, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        {getCountryFlag(country.name)}
-                        <span className="text-sm">{country.name}</span>
-                      </div>
-                      <span className="text-sm font-medium">{country.count}</span>
-                    </div>
-                  ))}
+            <TabsContent value="devices">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Desktop</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">85%</span>
+                    <span className="text-xs text-gray-500">17</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Mobile</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">15%</span>
+                    <span className="text-xs text-gray-500">3</span>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            </TabsContent>
+            
+            <TabsContent value="browsers">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Chrome</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">70%</span>
+                    <span className="text-xs text-gray-500">14</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Safari</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">20%</span>
+                    <span className="text-xs text-gray-500">4</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Firefox</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">10%</span>
+                    <span className="text-xs text-gray-500">2</span>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="os">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Windows</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">40%</span>
+                    <span className="text-xs text-gray-500">8</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">macOS</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">35%</span>
+                    <span className="text-xs text-gray-500">7</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm">Linux</span>
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium mr-2">25%</span>
+                    <span className="text-xs text-gray-500">5</span>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </div>
   );
 }

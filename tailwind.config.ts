@@ -108,6 +108,7 @@ export default {
 			},
 			fontFamily: {
 				'bricolage': ['Bricolage Grotesque', 'sans-serif'],
+				'geist': ['Geist Sans', 'sans-serif'],
 			}
 		}
 	},

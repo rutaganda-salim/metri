@@ -1,7 +1,6 @@
 
 import React from "react";
-import { MetricsCard } from "../ui/metrics-card";
-import { Users, Eye, Clock, ArrowUpRight } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { DateRange } from "react-day-picker";
@@ -33,17 +32,6 @@ interface MetricsData {
       value: number;
       isPositive: boolean;
     };
-  };
-}
-
-interface MetricItem {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  description: string;
-  trend?: {
-    value: number;
-    isPositive: boolean;
   };
 }
 
@@ -121,7 +109,7 @@ export function VisitorMetrics({ trackingId, dateRange }: VisitorMetricsProps) {
       const prevBounceRate = prevTotalVisitors ? (prevSinglePageVisitors / prevTotalVisitors) * 100 : 0;
       
       // Calculate avg session time (simplified)
-      const avgSessionTime = totalVisitors ? (currentPageViews / totalVisitors) * 60 : 0; // Rough estimate: 60 seconds per page
+      const avgSessionTime = totalVisitors ? (currentPageViews / totalVisitors) * 60 : 0;
       const prevAvgSessionTime = prevTotalVisitors ? (prevPageViews / prevTotalVisitors) * 60 : 0;
       
       // Calculate trends
@@ -168,51 +156,77 @@ export function VisitorMetrics({ trackingId, dateRange }: VisitorMetricsProps) {
   if (error) {
     console.error("VisitorMetrics error:", error);
   }
-  
-  const metrics: MetricItem[] = [
-    {
-      title: "Total Visitors",
-      value: isLoading ? "-" : metricsData?.totalVisitors || 0,
-      icon: <Users className="h-4 w-4" />,
-      description: "Unique visitors",
-      trend: isLoading ? undefined : metricsData?.trends.visitors
-    },
-    {
-      title: "Page Views",
-      value: isLoading ? "-" : metricsData?.pageViews || 0,
-      icon: <Eye className="h-4 w-4" />,
-      description: "Total page views",
-      trend: isLoading ? undefined : metricsData?.trends.pageViews
-    },
-    {
-      title: "Avg. Session",
-      value: isLoading ? "-" : metricsData?.avgSession || "0m 0s",
-      icon: <Clock className="h-4 w-4" />,
-      description: "Time on site",
-      trend: isLoading ? undefined : metricsData?.trends.avgSession
-    },
-    {
-      title: "Bounce Rate",
-      value: isLoading ? "-" : `${metricsData?.bounceRate || 0}%`,
-      icon: <ArrowUpRight className="h-4 w-4" />,
-      description: "Visitors who leave",
-      trend: isLoading ? undefined : metricsData?.trends.bounceRate
-    }
-  ];
+
+  const renderTrendBadge = (value: number, isPositive: boolean, inverted: boolean = false) => {
+    // For inverted metrics like bounce rate, lower is better
+    const displayIsPositive = inverted ? !isPositive : isPositive;
+    const formattedValue = Math.abs(value).toFixed(1);
+    
+    return (
+      <div 
+        className={`inline-flex items-center text-xs font-medium rounded px-1.5 py-0.5 ${
+          displayIsPositive 
+            ? 'text-green-700 dark:text-green-500' 
+            : 'text-red-700 dark:text-red-500'
+        }`}
+      >
+        {displayIsPositive ? (
+          <TrendingUp className="w-3 h-3 mr-1" />
+        ) : (
+          <TrendingDown className="w-3 h-3 mr-1" />
+        )}
+        {formattedValue}%
+      </div>
+    );
+  };
   
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {metrics.map((metric, index) => (
-        <div key={index} className="animate-fade-up" style={{ animationDelay: `${index * 100}ms` }}>
-          <MetricsCard
-            title={metric.title}
-            value={metric.value}
-            description={metric.description}
-            icon={metric.icon}
-            trend={metric.trend}
-          />
+    <div className="grid grid-cols-3 gap-1 border-b mb-8">
+      <div className="p-4 border-r">
+        <div className="text-sm font-medium text-gray-500 mb-1">Visitors</div>
+        <div className="flex items-baseline">
+          <span className="text-3xl font-bold mr-2">
+            {isLoading ? "-" : metricsData?.totalVisitors || 0}
+          </span>
+          {!isLoading && metricsData?.trends.visitors && (
+            renderTrendBadge(
+              metricsData.trends.visitors.value, 
+              metricsData.trends.visitors.isPositive
+            )
+          )}
         </div>
-      ))}
+      </div>
+
+      <div className="p-4 border-r">
+        <div className="text-sm font-medium text-gray-500 mb-1">Page Views</div>
+        <div className="flex items-baseline">
+          <span className="text-3xl font-bold mr-2">
+            {isLoading ? "-" : metricsData?.pageViews || 0}
+          </span>
+          {!isLoading && metricsData?.trends.pageViews && (
+            renderTrendBadge(
+              metricsData.trends.pageViews.value, 
+              metricsData.trends.pageViews.isPositive
+            )
+          )}
+        </div>
+      </div>
+
+      <div className="p-4">
+        <div className="text-sm font-medium text-gray-500 mb-1">Bounce Rate</div>
+        <div className="flex items-baseline">
+          <span className="text-3xl font-bold mr-2">
+            {isLoading ? "-" : `${metricsData?.bounceRate || 0}%`}
+          </span>
+          {!isLoading && metricsData?.trends.bounceRate && (
+            renderTrendBadge(
+              metricsData.trends.bounceRate.value, 
+              metricsData.trends.bounceRate.isPositive,
+              true
+            )
+          )}
+        </div>
+      </div>
     </div>
   );
 }

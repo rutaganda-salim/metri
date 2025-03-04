@@ -10,6 +10,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  Area,
+  AreaChart,
 } from "recharts";
 import { DateRange } from "react-day-picker";
 import { useQuery } from "@tanstack/react-query";
@@ -84,16 +86,12 @@ export function TimeChart({ trackingId, dateRange }: TimeChartProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="glass-morphism p-3 rounded-md">
+        <div className="bg-white p-3 rounded-md shadow-md border border-gray-200">
           <p className="text-sm font-medium mb-1">{label}</p>
           <div className="space-y-1">
             <p className="text-xs flex items-center">
-              <span className="w-2 h-2 inline-block mr-2 rounded-full" style={{ backgroundColor: "#1d4ed8" }}></span>
+              <span className="w-2 h-2 inline-block mr-2 rounded-full bg-blue-500"></span>
               Visitors: {payload[0].value.toLocaleString()}
-            </p>
-            <p className="text-xs flex items-center">
-              <span className="w-2 h-2 inline-block mr-2 rounded-full" style={{ backgroundColor: "#10b981" }}></span>
-              Page Views: {payload[1].value.toLocaleString()}
             </p>
           </div>
         </div>
@@ -105,75 +103,70 @@ export function TimeChart({ trackingId, dateRange }: TimeChartProps) {
   if (error) {
     console.error("TimeChart error:", error);
     return (
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle>Traffic Over Time</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-red-500">
-            Error loading chart data. Please try again later.
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-8">
+        <div className="flex items-center justify-center h-[300px] text-red-500">
+          Error loading chart data. Please try again later.
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Traffic Over Time</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              No data available for the selected period
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={chartData}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis 
-                  dataKey="date" 
-                  stroke="#888"
-                  fontSize={12}
-                />
-                <YAxis 
-                  stroke="#888"
-                  fontSize={12}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="visitors"
-                  stroke="#1d4ed8"
-                  activeDot={{ r: 8 }}
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="pageviews"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="mb-8">
+      <div className="h-[300px] bg-white rounded-md border">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : chartData.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            No data available for the selected period
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 20,
+              }}
+            >
+              <defs>
+                <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+              <XAxis 
+                dataKey="date" 
+                fontSize={12}
+                axisLine={false}
+                tickLine={false}
+                padding={{ left: 10, right: 10 }}
+              />
+              <YAxis 
+                fontSize={12}
+                axisLine={false}
+                tickLine={false}
+                tickCount={5}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="visitors"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorVisitors)"
+                activeDot={{ r: 6 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+    </div>
   );
 }

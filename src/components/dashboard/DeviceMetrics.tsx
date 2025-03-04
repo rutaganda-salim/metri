@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DateRange } from "react-day-picker";
-import { Smartphone, Tablet, Laptop, Monitor, Apple, Globe } from "lucide-react";
+import { Smartphone, Tablet, Laptop, Monitor } from "lucide-react";
 import { 
   FaWindows, 
   FaApple, 
@@ -87,19 +87,22 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
       const devices = Object.entries(deviceCounts).map(([name, count]) => ({
         name,
         count: count as number,
-        value: totalVisitors > 0 ? Math.round(((count as number) / totalVisitors) * 100) : 0
+        value: totalVisitors > 0 ? Math.round(((count as number) / totalVisitors) * 100) : 0,
+        color: getColorForIndex(Object.keys(deviceCounts).indexOf(name))
       })).sort((a, b) => b.count - a.count);
       
       const browsers = Object.entries(browserCounts).map(([name, count]) => ({
         name,
         count: count as number,
-        value: totalVisitors > 0 ? Math.round(((count as number) / totalVisitors) * 100) : 0
+        value: totalVisitors > 0 ? Math.round(((count as number) / totalVisitors) * 100) : 0,
+        color: getColorForIndex(Object.keys(browserCounts).indexOf(name))
       })).sort((a, b) => b.count - a.count);
       
       const os = Object.entries(osCounts).map(([name, count]) => ({
         name,
         count: count as number,
-        value: totalVisitors > 0 ? Math.round(((count as number) / totalVisitors) * 100) : 0
+        value: totalVisitors > 0 ? Math.round(((count as number) / totalVisitors) * 100) : 0,
+        color: getColorForIndex(Object.keys(osCounts).indexOf(name))
       })).sort((a, b) => b.count - a.count);
       
       return { devices, browsers, os };
@@ -163,7 +166,7 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="font-bricolage">
         <CardHeader>
           <CardTitle>Device Metrics</CardTitle>
         </CardHeader>
@@ -178,7 +181,7 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
 
   if (!data?.devices?.length && !data?.browsers?.length && !data?.os?.length) {
     return (
-      <Card>
+      <Card className="font-bricolage">
         <CardHeader>
           <CardTitle>Device Metrics</CardTitle>
         </CardHeader>
@@ -192,7 +195,7 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
   }
 
   return (
-    <Card>
+    <Card className="font-bricolage">
       <CardHeader>
         <CardTitle>Device Metrics</CardTitle>
       </CardHeader>
@@ -203,74 +206,86 @@ export function DeviceMetrics({ trackingId, dateRange }: DeviceMetricsProps) {
             <TabsTrigger value="browsers">Browsers</TabsTrigger>
             <TabsTrigger value="os">OS</TabsTrigger>
           </TabsList>
+          
           <TabsContent value="devices" className="space-y-4 mt-4">
             {data?.devices?.map((item, index) => (
-              <div key={item.name} className="flex items-center">
-                <div className="w-8 mr-2">
-                  {getDeviceIcon(item.name)}
+              <div key={item.name} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-8 mr-2">
+                      {getDeviceIcon(item.name)}
+                    </div>
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                  <div className="text-sm font-medium flex items-center">
+                    <span className="mr-2">{item.count}</span>
+                    <span className="text-muted-foreground">{item.value}%</span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between mb-1">
-                    <p className="text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-sm text-muted-foreground ml-2">{item.value}%</p>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div 
-                      className="h-2 rounded-full" 
-                      style={{ 
-                        width: `${item.value}%`,
-                        backgroundColor: getColorForIndex(index)
-                      }}
-                    />
-                  </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full" 
+                    style={{ 
+                      width: `${item.value}%`,
+                      backgroundColor: item.color 
+                    }}
+                  ></div>
                 </div>
               </div>
             ))}
           </TabsContent>
+          
           <TabsContent value="browsers" className="space-y-4 mt-4">
             {data?.browsers?.map((item, index) => (
-              <div key={item.name} className="flex items-center">
-                <div className="w-8 mr-2">
-                  {getBrowserIcon(item.name)}
+              <div key={item.name} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-8 mr-2">
+                      {getBrowserIcon(item.name)}
+                    </div>
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                  <div className="text-sm font-medium flex items-center">
+                    <span className="mr-2">{item.count}</span>
+                    <span className="text-muted-foreground">{item.value}%</span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between mb-1">
-                    <p className="text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-sm text-muted-foreground ml-2">{item.value}%</p>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div 
-                      className="h-2 rounded-full" 
-                      style={{ 
-                        width: `${item.value}%`,
-                        backgroundColor: getColorForIndex(index)
-                      }}
-                    />
-                  </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full" 
+                    style={{ 
+                      width: `${item.value}%`,
+                      backgroundColor: item.color 
+                    }}
+                  ></div>
                 </div>
               </div>
             ))}
           </TabsContent>
+          
           <TabsContent value="os" className="space-y-4 mt-4">
             {data?.os?.map((item, index) => (
-              <div key={item.name} className="flex items-center">
-                <div className="w-8 mr-2">
-                  {getOsIcon(item.name)}
+              <div key={item.name} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-8 mr-2">
+                      {getOsIcon(item.name)}
+                    </div>
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                  <div className="text-sm font-medium flex items-center">
+                    <span className="mr-2">{item.count}</span>
+                    <span className="text-muted-foreground">{item.value}%</span>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between mb-1">
-                    <p className="text-sm font-medium truncate">{item.name}</p>
-                    <p className="text-sm text-muted-foreground ml-2">{item.value}%</p>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div 
-                      className="h-2 rounded-full" 
-                      style={{ 
-                        width: `${item.value}%`,
-                        backgroundColor: getColorForIndex(index)
-                      }}
-                    />
-                  </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="h-2 rounded-full" 
+                    style={{ 
+                      width: `${item.value}%`,
+                      backgroundColor: item.color 
+                    }}
+                  ></div>
                 </div>
               </div>
             ))}

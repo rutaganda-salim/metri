@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DateRange } from "react-day-picker";
 import { Globe } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getCountryCodeByName } from "@/utils/countryUtils";
 
 interface WorldMapProps {
   trackingId?: string;
@@ -81,64 +82,8 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
   };
   
   const getCountryFlag = (countryName: string) => {
-    // ISO country codes for common countries (case-insensitive mapping)
-    const countryCodes: Record<string, string> = {
-      'united states': 'us',
-      'usa': 'us',
-      'united kingdom': 'gb',
-      'uk': 'gb',
-      'canada': 'ca',
-      'australia': 'au',
-      'germany': 'de',
-      'france': 'fr',
-      'japan': 'jp',
-      'china': 'cn',
-      'india': 'in',
-      'brazil': 'br',
-      'russia': 'ru',
-      'mexico': 'mx',
-      'spain': 'es',
-      'italy': 'it',
-      'south korea': 'kr',
-      'netherlands': 'nl',
-      'sweden': 'se',
-      'switzerland': 'ch',
-      'singapore': 'sg',
-      'nigeria': 'ng',
-      'south africa': 'za',
-      'new zealand': 'nz',
-      'ireland': 'ie',
-      'belgium': 'be',
-      'portugal': 'pt',
-      'norway': 'no',
-      'denmark': 'dk',
-      'finland': 'fi',
-      'poland': 'pl',
-      'austria': 'at',
-      'greece': 'gr',
-      'turkey': 'tr',
-      'thailand': 'th',
-      'indonesia': 'id',
-      'malaysia': 'my',
-      'philippines': 'ph',
-      'vietnam': 'vn',
-      'argentina': 'ar',
-      'chile': 'cl',
-      'colombia': 'co',
-      'peru': 'pe',
-      'egypt': 'eg',
-      'israel': 'il',
-      'united arab emirates': 'ae',
-      'saudi arabia': 'sa',
-      'kenya': 'ke',
-      'ghana': 'gh',
-      'morocco': 'ma',
-      'rwanda': 'rw'
-    };
-    
-    // Normalize country name for lookup (lowercase and trim)
-    const normalizedName = countryName.trim().toLowerCase();
-    const code = countryCodes[normalizedName] || '';
+    // Get the country code directly from our utility
+    const code = getCountryCodeByName(countryName);
     
     if (code) {
       return (
@@ -165,8 +110,8 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-6 mb-8">
-      <div className="bg-white border rounded-md">
+    <div className="grid md:grid-cols-2 gap-6 mb-8 font-bricolage">
+      <div className="bg-white dark:bg-card border rounded-md">
         <div className="border-b p-4">
           <h3 className="font-medium">Countries</h3>
         </div>
@@ -175,8 +120,8 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
             <div className="animate-pulse space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex justify-between items-center">
-                  <div className="h-4 w-32 bg-gray-200 rounded"></div>
-                  <div className="h-4 w-12 bg-gray-200 rounded"></div>
+                  <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-4 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
                 </div>
               ))}
             </div>
@@ -185,16 +130,27 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
               No country data available
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {data.slice(0, 5).map((country: CountryData, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    {getCountryFlag(country.name)}
-                    <span className="text-sm">{country.name}</span>
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      {getCountryFlag(country.name)}
+                      <span className="text-sm">{country.name}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium mr-2">{country.percentage}%</span>
+                      <span className="text-xs text-gray-500">{country.count}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">{country.percentage}%</span>
-                    <span className="text-xs text-gray-500">{country.count}</span>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div 
+                      className="h-2 rounded-full" 
+                      style={{ 
+                        width: `${country.percentage}%`,
+                        backgroundColor: getColorForIndex(index) 
+                      }}
+                    ></div>
                   </div>
                 </div>
               ))}
@@ -211,89 +167,65 @@ export function WorldMap({ trackingId, dateRange }: WorldMapProps) {
         </div>
       </div>
       
-      <div className="bg-white border rounded-md">
+      <div className="bg-white dark:bg-card border rounded-md">
         <div className="border-b p-4">
-          <h3 className="font-medium">Devices</h3>
+          <h3 className="font-medium">Device Summary</h3>
         </div>
         <div className="p-4">
-          <Tabs defaultValue="devices" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-4">
-              <TabsTrigger value="devices" className="text-xs">Devices</TabsTrigger>
-              <TabsTrigger value="browsers" className="text-xs">Browsers</TabsTrigger>
-              <TabsTrigger value="os" className="text-xs">OS</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="devices">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Desktop</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">85%</span>
-                    <span className="text-xs text-gray-500">17</span>
+          <div className="space-y-4">
+            {isLoading ? (
+              <div className="animate-pulse space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full"></div>
                   </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Mobile</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">15%</span>
-                    <span className="text-xs text-gray-500">3</span>
-                  </div>
-                </div>
+                ))}
               </div>
-            </TabsContent>
-            
-            <TabsContent value="browsers">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Chrome</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">70%</span>
-                    <span className="text-xs text-gray-500">14</span>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Desktop</span>
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium mr-2">75%</span>
+                      <span className="text-xs text-gray-500">15</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div className="h-2 rounded-full bg-blue-600" style={{ width: '75%' }}></div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Safari</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">20%</span>
-                    <span className="text-xs text-gray-500">4</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Mobile</span>
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium mr-2">20%</span>
+                      <span className="text-xs text-gray-500">4</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div className="h-2 rounded-full bg-green-500" style={{ width: '20%' }}></div>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Firefox</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">10%</span>
-                    <span className="text-xs text-gray-500">2</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Tablet</span>
+                    <div className="flex items-center">
+                      <span className="text-sm font-medium mr-2">5%</span>
+                      <span className="text-xs text-gray-500">1</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div className="h-2 rounded-full bg-purple-500" style={{ width: '5%' }}></div>
                   </div>
                 </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="os">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Windows</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">40%</span>
-                    <span className="text-xs text-gray-500">8</span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">macOS</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">35%</span>
-                    <span className="text-xs text-gray-500">7</span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Linux</span>
-                  <div className="flex items-center">
-                    <span className="text-sm font-medium mr-2">25%</span>
-                    <span className="text-xs text-gray-500">5</span>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -11,7 +11,6 @@ import { Copy, ArrowLeft, Check } from "lucide-react";
 const ScriptPage = () => {
   const { id } = useParams();
   const [website, setWebsite] = useState(null);
-  const [scriptData, setScriptData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -27,17 +26,6 @@ const ScriptPage = () => {
 
         if (error) throw error;
         setWebsite(data);
-
-        // Get script data
-        const { data: scriptResult, error: scriptError } = await supabase.functions.invoke(
-          "generate-tracking-script",
-          {
-            body: { trackingId: data.tracking_id, cdn: true },
-          }
-        );
-
-        if (scriptError) throw scriptError;
-        setScriptData(scriptResult);
       } catch (error) {
         console.error("Error fetching website:", error);
         toast({
@@ -57,6 +45,7 @@ const ScriptPage = () => {
     if (!website) return "";
     
     // Format the script tag with the correct data attributes
+    // Use window.location.origin to ensure it works in any environment
     return `<script
   defer
   data-website-id="${website.tracking_id}"
@@ -158,4 +147,3 @@ const ScriptPage = () => {
 };
 
 export default ScriptPage;
-
